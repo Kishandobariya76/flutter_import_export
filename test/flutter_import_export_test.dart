@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_import_export/flutter_import_export.dart';
 
@@ -82,6 +83,50 @@ void main() {
       expect(duplicates.length, equals(1));
       expect(duplicates.first.originalRowIndex, equals(1));
       expect(duplicates.first.duplicateRowIndex, equals(2));
+    });
+
+    test('TableDesignConfig presets provide valid theme configurations', () {
+      final dark = TableDesignConfig.dark();
+      expect(dark.showHorizontalGridLines, isTrue);
+      expect(dark.borderRadius.topLeft.x, equals(10.0));
+
+      final light = TableDesignConfig.light();
+      expect(light.rowBackgroundColor, equals(const Color(0xFFFFFFFF)));
+
+      final ocean = TableDesignConfig.oceanNavy();
+      expect(ocean.showVerticalGridLines, isTrue);
+
+      final emerald = TableDesignConfig.emerald();
+      expect(emerald.borderWidth, equals(1.5));
+
+      final custom = dark.copyWith(borderWidth: 3.0);
+      expect(custom.borderWidth, equals(3.0));
+      expect(custom.rowBackgroundColor, equals(dark.rowBackgroundColor));
+    });
+
+    testWidgets('ImportExportDataTable renders columns and rows properly', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ImportExportDataTable(
+              columns: const [
+                TableColumnDef(key: 'name', title: 'Name', subTitle: 'STRING'),
+                TableColumnDef(key: 'email', title: 'Email', subTitle: 'EMAIL'),
+              ],
+              rows: const [
+                {'name': 'Alex Johnson', 'email': 'alex@example.com'},
+                {'name': 'Sarah Connor', 'email': 'sarah@example.com'},
+              ],
+              designConfig: TableDesignConfig.dark(),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Name'), findsOneWidget);
+      expect(find.text('Email'), findsOneWidget);
+      expect(find.text('Alex Johnson'), findsOneWidget);
+      expect(find.text('Sarah Connor'), findsOneWidget);
     });
   });
 }

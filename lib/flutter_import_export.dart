@@ -9,3 +9,5 @@ export 'src/services/validation_engine.dart';
 export 'src/services/duplicate_detector.dart';
 export 'src/services/streaming_importer.dart';
 export 'src/services/diagnostics_service.dart';
+export 'src/widgets/table_design_config.dart';
+export 'src/widgets/import_export_data_table.dart';

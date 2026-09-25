@@ -283,7 +283,79 @@ final sheets = ExcelProcessor.parseSpreadsheetMock(
 
 ---
 
-### Step 3: Automatically Match Columns
+### Step 3: Display Data in Table Format with Custom Design (`ImportExportDataTable`)
+
+Display parsed or preview datasets with rich styling, sorting, pagination, and full border/color customization:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_import_export/flutter_import_export.dart';
+
+Widget buildCustomTable(List<Map<String, dynamic>> records) {
+  return ImportExportDataTable(
+    columns: const [
+      TableColumnDef(key: 'id', title: 'ID', subTitle: 'INTEGER'),
+      TableColumnDef(key: 'name', title: 'Customer Name', subTitle: 'STRING'),
+      TableColumnDef(key: 'email', title: 'Email Address', subTitle: 'EMAIL'),
+      TableColumnDef(key: 'company', title: 'Company', subTitle: 'STRING'),
+      TableColumnDef(key: 'revenue', title: 'Revenue', subTitle: 'DECIMAL'),
+    ],
+    rows: records,
+    pageSize: 10,
+    showPagination: true,
+    // Fully customize colors, borders, fonts, and alternating row striping:
+    designConfig: TableDesignConfig(
+      // Borders & Radius
+      borderColor: const Color(0xFF388BFD),
+      borderWidth: 1.5,
+      borderRadius: BorderRadius.circular(12.0),
+      showVerticalGridLines: true,
+      showHorizontalGridLines: true,
+      gridLineColor: const Color(0xFF21262D),
+      
+      // Header & Row Colors
+      headerBackgroundColor: const Color(0xFF161B22),
+      headerTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+      rowBackgroundColor: const Color(0xFF0D1117),
+      alternateRowBackgroundColor: const Color(0xFF161B22), // Zebra striping
+      rowHoverColor: const Color(0xFF1F242C),
+      cellTextStyle: const TextStyle(color: Color(0xFFC9D1D9), fontSize: 13),
+    ),
+    // Optional custom cell formatting (e.g. currency, badges)
+    cellBuilder: (context, rowIndex, columnKey, value) {
+      if (columnKey == 'revenue' && value is num) {
+        return Text('\$${value.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green));
+      }
+      return null; // Fallback to standard renderer
+    },
+  );
+}
+```
+
+#### Pre-Built Table Theme Presets
+
+You can also use one of the ready-to-use factory presets:
+
+```dart
+// 1. Dark GitHub/Vercel style:
+TableDesignConfig.dark()
+
+// 2. Clean modern light theme:
+TableDesignConfig.light()
+
+// 3. Ocean Navy enterprise theme:
+TableDesignConfig.oceanNavy()
+
+// 4. Emerald Fintech high-contrast theme:
+TableDesignConfig.emerald()
+
+// 5. Minimal outline with transparent background:
+TableDesignConfig.minimalBordered(borderColor: Colors.blue)
+```
+
+---
+
+### Step 4: Automatically Match Columns
 
 Use the `SmartMatcher` to auto-bind user uploaded headers to your target schema:
 
@@ -304,7 +376,7 @@ for (final mapping in columnMappings) {
 
 ---
 
-### Step 4: Validate Rows & Catch Issues Before Persistence
+### Step 5: Validate Rows & Catch Issues Before Persistence
 
 Run the built-in validation engine to enforce required fields, type checks, and custom validation rules:
 
@@ -322,7 +394,7 @@ print('Found ${blockingErrors.length} errors and ${warnings.length} warnings.');
 
 ---
 
-### Step 5: Detect Duplicates & Select Resolution Strategy
+### Step 6: Detect Duplicates & Select Resolution Strategy
 
 Detect duplicates based on composite keys (e.g. `email`):
 
@@ -338,7 +410,7 @@ print('Detected ${duplicates.length} duplicate records.');
 
 ---
 
-### Step 6: Stream Chunks into Your Database or State
+### Step 7: Stream Chunks into Your Database or State
 
 Stream data in chunks with real-time UI progress updates and cancellation support:
 
@@ -367,7 +439,7 @@ await for (final progress in progressStream) {
 
 ---
 
-### Step 7: Export Clean Records (CSV, Excel, or JSON)
+### Step 8: Export Clean Records (CSV, Excel, or JSON)
 
 Export your data back out with formatting and compatibility options:
 

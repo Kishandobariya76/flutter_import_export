@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_import_export/flutter_import_export.dart';
 import '../data/demo_data.dart';
 import '../widgets/app_theme.dart';
 
@@ -356,16 +357,64 @@ class ImportJsonScreen extends StatelessWidget {
 }
 
 /// Screen for File Data Preview
-class FilePreviewScreen extends StatelessWidget {
+class FilePreviewScreen extends StatefulWidget {
   final ValueChanged<String>? onNavigate;
 
   const FilePreviewScreen({super.key, this.onNavigate});
+
+  @override
+  State<FilePreviewScreen> createState() => _FilePreviewScreenState();
+}
+
+class _FilePreviewScreenState extends State<FilePreviewScreen> {
+  String _selectedPreset = 'dark';
+  Color _borderColor = const Color(0xFF388BFD);
+  double _borderWidth = 1.5;
+  double _borderRadius = 10.0;
+  bool _enableZebra = true;
+  bool _showVerticalLines = false;
+  bool _showHorizontalLines = true;
+
+  TableDesignConfig get _currentDesign {
+    TableDesignConfig base;
+    switch (_selectedPreset) {
+      case 'light':
+        base = TableDesignConfig.light();
+        break;
+      case 'ocean':
+        base = TableDesignConfig.oceanNavy();
+        break;
+      case 'emerald':
+        base = TableDesignConfig.emerald();
+        break;
+      case 'minimal':
+        base = TableDesignConfig.minimalBordered(borderColor: _borderColor);
+        break;
+      case 'dark':
+      default:
+        base = TableDesignConfig.dark();
+        break;
+    }
+
+    return base.copyWith(
+      borderColor: _borderColor,
+      borderWidth: _borderWidth,
+      borderRadius: BorderRadius.circular(_borderRadius),
+      alternateRowBackgroundColor: _enableZebra
+          ? (_selectedPreset == 'light' ? const Color(0xFFF6F8FA) : const Color(0xFF13171F))
+          : null,
+      showVerticalGridLines: _showVerticalLines,
+      showHorizontalGridLines: _showHorizontalLines,
+      gridLineColor: _borderColor.withValues(alpha: 0.25),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isMobile = constraints.maxWidth < 800;
+        final design = _currentDesign;
 
         return SingleChildScrollView(
           padding: EdgeInsets.all(isMobile ? 16.0 : 28.0),
@@ -379,9 +428,9 @@ class FilePreviewScreen extends StatelessWidget {
                 runSpacing: 10,
                 children: [
                   _buildHeader(
-                    title: 'Data Preview: customers.xlsx',
-                    description: 'First 100 rows rendered. Showing column types, non-null percentages, and raw sample records.',
-                    icon: Icons.preview_rounded,
+                    title: 'Data Preview & Table Designer',
+                    description: 'Customize table design, borders, header styling, and alternating colors in real-time.',
+                    icon: Icons.table_chart_rounded,
                     isMobile: isMobile,
                   ),
                   Wrap(
@@ -389,13 +438,13 @@ class FilePreviewScreen extends StatelessWidget {
                     runSpacing: 8,
                     children: [
                       OutlinedButton.icon(
-                        onPressed: () => onNavigate?.call('import_csv'),
+                        onPressed: () => widget.onNavigate?.call('import_csv'),
                         icon: const Icon(Icons.arrow_back, size: 14),
                         label: const Text('Setup'),
                         style: OutlinedButton.styleFrom(foregroundColor: AppTheme.textSecondary),
                       ),
                       ElevatedButton.icon(
-                        onPressed: () => onNavigate?.call('column_mapping'),
+                        onPressed: () => widget.onNavigate?.call('column_mapping'),
                         icon: const Icon(Icons.schema_rounded, size: 14),
                         label: const Text('Column Mapping'),
                         style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryAccent, foregroundColor: Colors.white),
@@ -405,85 +454,179 @@ class FilePreviewScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 18),
-              // Stats Row / Grid
-              if (isMobile)
-                Column(
-                  children: [
-                    Row(
-                      children: [
-                        _buildMiniStat('Total Records', '10,000', Icons.dataset_rounded, AppTheme.primaryBlue),
-                        const SizedBox(width: 10),
-                        _buildMiniStat('Columns', '6 Fields', Icons.view_column_rounded, AppTheme.successGreen),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        _buildMiniStat('Null Density', '0.04%', Icons.check_circle_outline, const Color(0xFFA371F7)),
-                        const SizedBox(width: 10),
-                        _buildMiniStat('Format', 'UTF-8 / Tabular', Icons.code_rounded, AppTheme.textSecondary),
-                      ],
-                    ),
-                  ],
-                )
-              else
-                Row(
-                  children: [
-                    _buildMiniStat('Total Records', '10,000', Icons.dataset_rounded, AppTheme.primaryBlue),
-                    const SizedBox(width: 12),
-                    _buildMiniStat('Detected Columns', '6 Fields', Icons.view_column_rounded, AppTheme.successGreen),
-                    const SizedBox(width: 12),
-                    _buildMiniStat('Null Value Density', '0.04%', Icons.check_circle_outline, const Color(0xFFA371F7)),
-                    const SizedBox(width: 12),
-                    _buildMiniStat('Encoding / Delimiter', 'UTF-8 / Tabular', Icons.code_rounded, AppTheme.textSecondary),
-                  ],
-                ),
-              const SizedBox(height: 18),
-              // Data Table
+              // Table Design Customizer Card
               Container(
+                padding: EdgeInsets.all(isMobile ? 14 : 18),
                 decoration: BoxDecoration(
                   color: AppTheme.surfaceDark,
                   borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: _borderColor.withValues(alpha: 0.5)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.palette_rounded, size: 18, color: _borderColor),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Live Table Design Controls (TableDesignConfig)',
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    // Theme Presets
+                    const Text('Theme Presets:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.textMuted)),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _buildPresetChip('Modern Dark', 'dark'),
+                        _buildPresetChip('Clean Light', 'light'),
+                        _buildPresetChip('Ocean Navy', 'ocean'),
+                        _buildPresetChip('Emerald Fintech', 'emerald'),
+                        _buildPresetChip('Minimal Outline', 'minimal'),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    const Divider(color: AppTheme.borderDark),
+                    const SizedBox(height: 10),
+                    // Border Colors & Properties
+                    Wrap(
+                      spacing: 20,
+                      runSpacing: 12,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        // Border Color Choices
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('Border Color: ', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                            const SizedBox(width: 6),
+                            _buildColorDot(const Color(0xFF388BFD), 'Blue'),
+                            _buildColorDot(const Color(0xFF238636), 'Green'),
+                            _buildColorDot(const Color(0xFFA371F7), 'Purple'),
+                            _buildColorDot(const Color(0xFFD29922), 'Amber'),
+                            _buildColorDot(const Color(0xFFF85149), 'Red'),
+                            _buildColorDot(const Color(0xFF30363D), 'Dark'),
+                          ],
+                        ),
+                        // Border Width Choice
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('Border: ', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                            _buildOptionButton('1px', _borderWidth == 1.0, () => setState(() => _borderWidth = 1.0)),
+                            _buildOptionButton('2px', _borderWidth == 2.0, () => setState(() => _borderWidth = 2.0)),
+                            _buildOptionButton('3px', _borderWidth == 3.0, () => setState(() => _borderWidth = 3.0)),
+                          ],
+                        ),
+                        // Border Radius Choice
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('Radius: ', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                            _buildOptionButton('0px', _borderRadius == 0.0, () => setState(() => _borderRadius = 0.0)),
+                            _buildOptionButton('8px', _borderRadius == 8.0, () => setState(() => _borderRadius = 8.0)),
+                            _buildOptionButton('12px', _borderRadius == 12.0, () => setState(() => _borderRadius = 12.0)),
+                            _buildOptionButton('20px', _borderRadius == 20.0, () => setState(() => _borderRadius = 20.0)),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 8,
+                      children: [
+                        _buildToggleSwitch('Alternating Rows (Zebra)', _enableZebra, (val) => setState(() => _enableZebra = val)),
+                        _buildToggleSwitch('Vertical Gridlines', _showVerticalLines, (val) => setState(() => _showVerticalLines = val)),
+                        _buildToggleSwitch('Horizontal Gridlines', _showHorizontalLines, (val) => setState(() => _showHorizontalLines = val)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              // Package's ImportExportDataTable Component
+              ImportExportDataTable(
+                columns: const [
+                  TableColumnDef(key: 'id', title: 'id', subTitle: 'INTEGER'),
+                  TableColumnDef(key: 'name', title: 'name', subTitle: 'STRING'),
+                  TableColumnDef(key: 'email', title: 'email', subTitle: 'EMAIL'),
+                  TableColumnDef(key: 'company', title: 'company', subTitle: 'STRING'),
+                  TableColumnDef(key: 'revenue', title: 'revenue', subTitle: 'DECIMAL'),
+                  TableColumnDef(key: 'status', title: 'status', subTitle: 'ENUM'),
+                ],
+                rows: DemoData.sampleRows,
+                designConfig: design,
+                pageSize: 8,
+                cellBuilder: (context, index, columnKey, value) {
+                  if (columnKey == 'revenue' && value is num) {
+                    return Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '\$${value.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          color: design.cellTextStyle?.color ?? const Color(0xFFC9D1D9),
+                          fontFamily: 'Courier',
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    );
+                  }
+                  if (columnKey == 'status' && value is String) {
+                    return Align(
+                      alignment: Alignment.centerLeft,
+                      child: _buildStatusBadge(value),
+                    );
+                  }
+                  return null; // Fallback to standard renderer
+                },
+              ),
+              const SizedBox(height: 18),
+              // Live Code Implementation Box
+              Container(
+                padding: const EdgeInsets.all(16),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: AppTheme.cardDark,
+                  borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: AppTheme.borderDark),
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: DataTable(
-                      headingRowColor: WidgetStateProperty.all(AppTheme.cardDark),
-                      dataRowColor: WidgetStateProperty.resolveWith(
-                        (states) => states.contains(WidgetState.hovered) ? AppTheme.cardDark.withValues(alpha: 0.5) : AppTheme.surfaceDark,
-                      ),
-                      columnSpacing: 24,
-                      headingTextStyle: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.textPrimary, fontSize: 12),
-                      dataTextStyle: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
-                      columns: const [
-                        DataColumn(label: Text('Row #')),
-                        DataColumn(label: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [Text('id'), Text('INTEGER', style: TextStyle(fontSize: 9, color: AppTheme.primaryBlue))])),
-                        DataColumn(label: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [Text('name'), Text('STRING', style: TextStyle(fontSize: 9, color: AppTheme.primaryBlue))])),
-                        DataColumn(label: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [Text('email'), Text('EMAIL', style: TextStyle(fontSize: 9, color: AppTheme.primaryBlue))])),
-                        DataColumn(label: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [Text('company'), Text('STRING', style: TextStyle(fontSize: 9, color: AppTheme.primaryBlue))])),
-                        DataColumn(label: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [Text('revenue'), Text('DECIMAL', style: TextStyle(fontSize: 9, color: AppTheme.primaryBlue))])),
-                        DataColumn(label: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [Text('status'), Text('ENUM', style: TextStyle(fontSize: 9, color: AppTheme.primaryBlue))])),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.code_rounded, size: 16, color: AppTheme.primaryBlue),
+                        SizedBox(width: 8),
+                        Text('Copyable Code Implementation:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.textPrimary)),
                       ],
-                      rows: DemoData.sampleRows.asMap().entries.map((entry) {
-                        final index = entry.key + 1;
-                        final row = entry.value;
-                        return DataRow(
-                          cells: [
-                            DataCell(Text('$index', style: const TextStyle(color: AppTheme.textMuted, fontWeight: FontWeight.bold))),
-                            DataCell(Text('${row['id']}')),
-                            DataCell(Text('${row['name']}', style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w500))),
-                            DataCell(Text('${row['email']}')),
-                            DataCell(Text('${row['company']}')),
-                            DataCell(Text('\$${(row['revenue'] as double).toStringAsFixed(2)}')),
-                            DataCell(_buildStatusBadge(row['status'] as String)),
-                          ],
-                        );
-                      }).toList(),
                     ),
-                  ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'ImportExportDataTable(\n'
+                      '  columns: const [\n'
+                      '    TableColumnDef(key: "id", title: "id", subTitle: "INTEGER"),\n'
+                      '    TableColumnDef(key: "name", title: "name", subTitle: "STRING"),\n'
+                      '    TableColumnDef(key: "email", title: "email", subTitle: "EMAIL"),\n'
+                      '  ],\n'
+                      '  rows: datasetRows,\n'
+                      '  designConfig: TableDesignConfig(\n'
+                      '    borderColor: Color(0x${_borderColor.toARGB32().toRadixString(16).toUpperCase()}),\n'
+                      '    borderWidth: $_borderWidth,\n'
+                      '    borderRadius: BorderRadius.circular($_borderRadius),\n'
+                      '    showVerticalGridLines: $_showVerticalLines,\n'
+                      '    showHorizontalGridLines: $_showHorizontalLines,\n'
+                      '  ),\n'
+                      ')',
+                      style: const TextStyle(fontFamily: 'Courier', fontSize: 11, color: Color(0xFF58A6FF), height: 1.4),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -493,31 +636,96 @@ class FilePreviewScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMiniStat(String label, String value, IconData icon, Color color) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: AppTheme.surfaceDark,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppTheme.borderDark),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 16, color: color),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(label, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, color: AppTheme.textMuted)),
-                  Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
-                ],
-              ),
+  Widget _buildPresetChip(String label, String key) {
+    final isSelected = _selectedPreset == key;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      selectedColor: AppTheme.primaryBlue.withValues(alpha: 0.25),
+      backgroundColor: AppTheme.cardDark,
+      labelStyle: TextStyle(
+        fontSize: 11,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        color: isSelected ? AppTheme.primaryBlue : AppTheme.textSecondary,
+      ),
+      side: BorderSide(
+        color: isSelected ? AppTheme.primaryBlue : AppTheme.borderDark,
+      ),
+      onSelected: (_) {
+        setState(() {
+          _selectedPreset = key;
+          if (key == 'ocean') _borderColor = const Color(0xFF1E3A66);
+          if (key == 'emerald') _borderColor = const Color(0xFF238636);
+          if (key == 'light') _borderColor = const Color(0xFFD0D7DE);
+          if (key == 'dark') _borderColor = const Color(0xFF388BFD);
+          if (key == 'minimal') _borderColor = const Color(0xFFA371F7);
+        });
+      },
+    );
+  }
+
+  Widget _buildColorDot(Color color, String tooltip) {
+    final isSelected = _borderColor.toARGB32() == color.toARGB32();
+    return GestureDetector(
+      onTap: () => setState(() => _borderColor = color),
+      child: Tooltip(
+        message: tooltip,
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 3),
+          width: 22,
+          height: 22,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: isSelected ? Colors.white : Colors.transparent,
+              width: 2,
             ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildOptionButton(String label, bool isSelected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(left: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.primaryBlue : AppTheme.cardDark,
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: isSelected ? AppTheme.primaryBlue : AppTheme.borderDark),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            color: isSelected ? Colors.white : AppTheme.textSecondary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildToggleSwitch(String label, bool value, ValueChanged<bool> onChanged) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          height: 28,
+          child: Switch(
+            value: value,
+            onChanged: onChanged,
+            activeThumbColor: AppTheme.primaryBlue,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(label, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+      ],
     );
   }
 
