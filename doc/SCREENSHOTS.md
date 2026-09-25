@@ -2,7 +2,7 @@
 
 This document describes how to capture and update the visual documentation for **Flutter Import Export**.
 
-All visual artifacts in `docs/screenshots/` are captured directly from the actual running example application using deterministic datasets.
+All visual artifacts in `doc/screenshots/` are captured directly from the actual running example application using deterministic datasets.
 
 ---
 
@@ -11,7 +11,7 @@ All visual artifacts in `docs/screenshots/` are captured directly from the actua
 Screenshots are organized in:
 
 ```text
-docs/
+doc/
 └── screenshots/
     ├── dashboard.png
     ├── import_csv.png
@@ -139,7 +139,7 @@ The script will:
 * Launch headless Google Chrome at Retina resolution (`1440x900`)
 * Allow the Flutter Web engine to initialize and settle
 * Sequentially capture each of the 24 screens
-* Validate file size and write directly to `docs/screenshots/<screen_id>.png`
+* Validate file size and write directly to `doc/screenshots/<screen_id>.png`
 
 ---
 
@@ -180,5 +180,5 @@ The script will:
 * [x] No placeholder images or mockups
 * [x] No broken image links in `README.md`
 * [x] No sensitive or personal user information
-* [x] All 24 screenshot files exist in `docs/screenshots/`
+* [x] All 24 screenshot files exist in `doc/screenshots/`
 * [x] Dark mode developer UI system used consistently

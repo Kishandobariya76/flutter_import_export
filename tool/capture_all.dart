@@ -30,7 +30,7 @@ const screens = [
 
 Future<void> main() async {
   final chromePath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-  final outDir = Directory('docs/screenshots');
+  final outDir = Directory('doc/screenshots');
   if (!outDir.existsSync()) {
     outDir.createSync(recursive: true);
   }
@@ -39,7 +39,7 @@ Future<void> main() async {
 
   for (var i = 0; i < screens.length; i++) {
     final screen = screens[i];
-    final targetPath = 'docs/screenshots/$screen.png';
+    final targetPath = 'doc/screenshots/$screen.png';
     print('[${i + 1}/${screens.length}] Capturing $screen -> $targetPath');
 
     final result = await Process.run(chromePath, [
@@ -64,7 +64,7 @@ Future<void> main() async {
   print('\nCapture process finished! Verifying all files:');
   var allOk = true;
   for (final screen in screens) {
-    final f = File('docs/screenshots/$screen.png');
+    final f = File('doc/screenshots/$screen.png');
     if (!f.existsSync() || f.lengthSync() < 1000) {
       allOk = false;
       stderr.writeln('Missing or invalid: ${f.path}');

@@ -18,47 +18,47 @@ A powerful, high-throughput Flutter package for importing, transforming, validat
 ### Dashboard (Hero Overview)
 The mission control center of data ingestion. Displays live KPI counters, recent execution metrics (10,000 records ingested with 9,842 clean commits), format capabilities, and navigation shortcuts.
 
-![Flutter Import Export Dashboard](docs/screenshots/dashboard.png)
+![Flutter Import Export Dashboard](doc/screenshots/dashboard.png)
 
 ### Import Workflow & Data Preview
 High-density tabular preview inspecting the first 100 rows, data type chips, non-null value density, and delimiter detection before column schema mapping.
 
-![Import Workflow](docs/screenshots/file_preview.png)
+![Import Workflow](doc/screenshots/file_preview.png)
 
 ### Column Mapping & Schema Binding
 Intelligent schema binder aligning incoming file headers (`contact_email`, `full_name`) with target schema definitions using alias matching and fuzzy similarity scores.
 
-![Column Mapping](docs/screenshots/column_mapping.png)
+![Column Mapping](doc/screenshots/column_mapping.png)
 
 ### Pre-Persistence Validation Report
 Real-time validation engine flagging blocking errors (such as RFC-5322 email syntax failures or empty required fields) and non-fatal warnings before database commit.
 
-![Validation Results](docs/screenshots/validation.png)
+![Validation Results](doc/screenshots/validation.png)
 
 ### Import Execution Summary
 Detailed run summary detailing total ingested volume, successful records (9,842), coerced warnings (112), quarantined errors (46), and throughput (8,540 rows/sec).
 
-![Import Result](docs/screenshots/import_result.png)
+![Import Result](doc/screenshots/import_result.png)
 
 ### Export Engine
 Fine-grained serialization options for CSV, Excel (XLSX), and JSON formats with custom delimiters, UTF-8 BOM, and formula controls.
 
-![CSV Export Settings](docs/screenshots/export_csv.png)
+![CSV Export Settings](doc/screenshots/export_csv.png)
 
 ### Configuration Playground
 Interactive tuning dashboard for adjusting chunk sizes, error tolerances, strict schema toggles, and concurrency parameters with live Dart code generation.
 
-![Configuration Playground](docs/screenshots/configuration_playground.png)
+![Configuration Playground](doc/screenshots/configuration_playground.png)
 
 ### Developer Mode & Runtime State
 Full runtime introspection displaying Dart isolate thread pool status, heap memory telemetry, and internal bus event dispatches.
 
-![Developer Mode](docs/screenshots/developer_mode.png)
+![Developer Mode](doc/screenshots/developer_mode.png)
 
 ### System Diagnostics
 Hardware architecture verification, vector acceleration telemetry, stream backpressure monitoring, and platform profiling.
 
-![Diagnostics](docs/screenshots/diagnostics.png)
+![Diagnostics](doc/screenshots/diagnostics.png)
 
 ---
 
@@ -591,15 +591,15 @@ Marcus Chen,m.chen@apexanalytics.com,Apex Analytics,210000.00
 
 The data preview inspects incoming column headers, data types, and row densities prior to transformation.
 
-![Import Preview](docs/screenshots/file_preview.png)
+![Import Preview](doc/screenshots/file_preview.png)
 
 ### Format Specific Ingestion
 
 | Format | Screenshot | Documentation |
 |---|---|---|
-| **CSV** | ![CSV Ingestion](docs/screenshots/import_csv.png) | Auto-sniffs `,`, `;`, `\t`, `\|`. Supports custom quote characters, encoding selection (UTF-8, UTF-16, ISO-8859-1), and header row offsets. |
-| **Excel** | ![Excel Ingestion](docs/screenshots/import_excel.png) | Inspects multi-sheet OpenXML workbooks. Evaluates formula cells and provides ISO-8601 date parsing. |
-| **JSON** | ![JSON Ingestion](docs/screenshots/import_json.png) | Traverses JSON arrays and JSONL streams using customizable JSONPath selectors (e.g. `$.data.customers[*]`). |
+| **CSV** | ![CSV Ingestion](doc/screenshots/import_csv.png) | Auto-sniffs `,`, `;`, `\t`, `\|`. Supports custom quote characters, encoding selection (UTF-8, UTF-16, ISO-8859-1), and header row offsets. |
+| **Excel** | ![Excel Ingestion](doc/screenshots/import_excel.png) | Inspects multi-sheet OpenXML workbooks. Evaluates formula cells and provides ISO-8601 date parsing. |
+| **JSON** | ![JSON Ingestion](doc/screenshots/import_json.png) | Traverses JSON arrays and JSONL streams using customizable JSONPath selectors (e.g. `$.data.customers[*]`). |
 
 ---
 
@@ -607,7 +607,7 @@ The data preview inspects incoming column headers, data types, and row densities
 
 Define strict contracts for your data models. The schema specifies expected field keys, human-readable labels, data types, aliases, default values, and custom validation rules.
 
-![Schema Inspector](docs/screenshots/schema_inspector.png)
+![Schema Inspector](doc/screenshots/schema_inspector.png)
 
 ```dart
 final schema = DataSchema(
@@ -666,12 +666,12 @@ final schema = DataSchema(
 ### Automated Column Mapping
 Match incoming arbitrary file columns to schema fields with high precision:
 
-![Column Mapping](docs/screenshots/column_mapping.png)
+![Column Mapping](doc/screenshots/column_mapping.png)
 
 ### Heuristic Scoring Engine
 The `SmartMatcher` calculates fuzzy similarity using Levenshtein distance, token overlap, and schema alias dictionaries:
 
-![Smart Matching Engine](docs/screenshots/smart_mapping.png)
+![Smart Matching Engine](doc/screenshots/smart_mapping.png)
 
 ```dart
 final mappings = SmartMatcher.matchColumns(
@@ -692,12 +692,12 @@ for (final m in mappings) {
 ### Live Issue Matrix
 Pre-persistence validation isolates faulty records while allowing valid records to proceed:
 
-![Validation](docs/screenshots/validation.png)
+![Validation](doc/screenshots/validation.png)
 
 ### Deep Error Inspection
 Inspect the precise row offset, offending raw value, and violated rule:
 
-![Error Details](docs/screenshots/error_details.png)
+![Error Details](doc/screenshots/error_details.png)
 
 ```dart
 final issues = ValidationEngine.validateRecords(
@@ -717,7 +717,7 @@ for (final issue in issues) {
 
 Detect duplicate records using single or composite unique keys (e.g. `[email, company]`):
 
-![Duplicate Detection](docs/screenshots/duplicate_detection.png)
+![Duplicate Detection](doc/screenshots/duplicate_detection.png)
 
 ### Resolution Strategies
 * **`DuplicateStrategy.skip`**: Preserves the first record and ignores duplicate occurrences.
@@ -731,7 +731,7 @@ Detect duplicate records using single or composite unique keys (e.g. `[email, co
 
 Pre-process and standardize values before database insertion:
 
-![Transformation Pipeline](docs/screenshots/transformation.png)
+![Transformation Pipeline](doc/screenshots/transformation.png)
 
 ```dart
 const transformations = [
@@ -763,9 +763,9 @@ Export cleanly validated datasets into CSV, Excel, or JSON formats:
 
 | Format | View | Key Settings |
 |---|---|---|
-| **CSV** | ![CSV Export](docs/screenshots/export_csv.png) | Custom delimiter (`,`, `;`, `\t`), quote mode (`QuoteMode.necessary`, `QuoteMode.always`), CRLF/LF line endings, and UTF-8 BOM. |
-| **Excel** | ![Excel Export](docs/screenshots/export_excel.png) | Multi-sheet OpenXML, custom sheet naming, frozen headers, and auto-fit column widths. |
-| **JSON** | ![JSON Export](docs/screenshots/export_json.png) | Pretty-printed or minified JSON array, JSON Lines (JSONL), and null field inclusion toggles. |
+| **CSV** | ![CSV Export](doc/screenshots/export_csv.png) | Custom delimiter (`,`, `;`, `\t`), quote mode (`QuoteMode.necessary`, `QuoteMode.always`), CRLF/LF line endings, and UTF-8 BOM. |
+| **Excel** | ![Excel Export](doc/screenshots/export_excel.png) | Multi-sheet OpenXML, custom sheet naming, frozen headers, and auto-fit column widths. |
+| **JSON** | ![JSON Export](doc/screenshots/export_json.png) | Pretty-printed or minified JSON array, JSON Lines (JSONL), and null field inclusion toggles. |
 
 ---
 
@@ -774,22 +774,22 @@ Export cleanly validated datasets into CSV, Excel, or JSON formats:
 ### Configuration Playground
 Test and tune parameters in real time with live Dart code generation:
 
-![Configuration Playground](docs/screenshots/configuration_playground.png)
+![Configuration Playground](doc/screenshots/configuration_playground.png)
 
 ### Runtime State & Flags
 Inspect active isolate worker pools, debug flags, and runtime memory:
 
-![Developer Mode](docs/screenshots/developer_mode.png)
+![Developer Mode](doc/screenshots/developer_mode.png)
 
 ### Import Session Inspector
 Audit raw byte streams, checksums, and session traces:
 
-![Import Inspector](docs/screenshots/import_inspector.png)
+![Import Inspector](doc/screenshots/import_inspector.png)
 
 ### Structured Event Logs
 Track parsing stages, validation warnings, and commit latencies:
 
-![Logs](docs/screenshots/logs.png)
+![Logs](doc/screenshots/logs.png)
 
 ---
 
@@ -798,17 +798,17 @@ Track parsing stages, validation warnings, and commit latencies:
 ### Streaming Concurrency & Large File Processing
 Process 100,000+ rows smoothly with constant memory overhead:
 
-![Large File Processing](docs/screenshots/large_file_processing.png)
+![Large File Processing](doc/screenshots/large_file_processing.png)
 
 ### Safe Cancellation & Rollbacks
 Aborting an in-flight import triggers graceful cleanup and rolls back open database transactions:
 
-![Cancellation](docs/screenshots/cancellation.png)
+![Cancellation](doc/screenshots/cancellation.png)
 
 ### Performance Benchmarks
 Throughput profiles across dataset volumes:
 
-![Performance](docs/screenshots/performance.png)
+![Performance](doc/screenshots/performance.png)
 
 | Data Format | 10,000 Rows | 50,000 Rows | 100,000 Rows | Throughput | Peak Heap |
 |---|---|---|---|---|---|
@@ -833,7 +833,7 @@ cd example
 flutter test
 ```
 
-To regenerate the documentation screenshots, see [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md).
+To regenerate the documentation screenshots, see [doc/SCREENSHOTS.md](doc/SCREENSHOTS.md).
 
 ---
 
