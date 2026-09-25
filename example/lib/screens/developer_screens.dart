@@ -9,98 +9,109 @@ class ConfigurationPlaygroundScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(28.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(
-            title: 'Configuration Playground',
-            description: 'Experiment with ingestion chunk sizes, error tolerances, isolate worker concurrency, and live Dart configurations.',
-            icon: Icons.tune_rounded,
-          ),
-          const SizedBox(height: 20),
-          Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 800;
+
+        final knobsCard = Container(
+          padding: EdgeInsets.all(isMobile ? 16 : 20),
+          decoration: BoxDecoration(color: AppTheme.surfaceDark, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppTheme.borderDark)),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Left: Sliders and Toggles
-              Expanded(
-                flex: 3,
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(color: AppTheme.surfaceDark, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppTheme.borderDark)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Pipeline Knobs & Tuning Parameters', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
-                      const SizedBox(height: 20),
-                      _buildSliderRow('Chunk Size (Rows per batch)', '1,000 rows', 0.2, 'Small batches reduce memory latency; large batches increase raw throughput.'),
-                      const SizedBox(height: 16),
-                      _buildSliderRow('Max Error Tolerance Threshold', '50 errors', 0.1, 'Abort entire import if error count exceeds this threshold.'),
-                      const SizedBox(height: 16),
-                      _buildSliderRow('Isolate Worker Threads', '4 Isolates', 0.5, 'Parallel CPU cores allocated for deserialization and validation.'),
-                      const SizedBox(height: 20),
-                      const Divider(color: AppTheme.borderDark),
-                      const SizedBox(height: 16),
-                      _buildToggleRow('Strict Schema Mode', 'Reject records with undeclared excess columns', true),
-                      const SizedBox(height: 10),
-                      _buildToggleRow('Auto-Coerce Compatible Types', 'Convert numeric strings ("123") to integers automatically', true),
-                      const SizedBox(height: 10),
-                      _buildToggleRow('Simd / Vector Acceleration', 'Enable hardware-accelerated delimiter sniffing', true),
-                    ],
-                  ),
-                ),
+              const Text('Pipeline Knobs & Tuning Parameters', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+              const SizedBox(height: 20),
+              _buildSliderRow('Chunk Size (Rows per batch)', '1,000 rows', 0.2, 'Small batches reduce memory latency; large batches increase raw throughput.'),
+              const SizedBox(height: 16),
+              _buildSliderRow('Max Error Tolerance Threshold', '50 errors', 0.1, 'Abort entire import if error count exceeds this threshold.'),
+              const SizedBox(height: 16),
+              _buildSliderRow('Isolate Worker Threads', '4 Isolates', 0.5, 'Parallel CPU cores allocated for deserialization and validation.'),
+              const SizedBox(height: 20),
+              const Divider(color: AppTheme.borderDark),
+              const SizedBox(height: 16),
+              _buildToggleRow('Strict Schema Mode', 'Reject records with undeclared excess columns', true),
+              const SizedBox(height: 10),
+              _buildToggleRow('Auto-Coerce Compatible Types', 'Convert numeric strings ("123") to integers automatically', true),
+              const SizedBox(height: 10),
+              _buildToggleRow('Simd / Vector Acceleration', 'Enable hardware-accelerated delimiter sniffing', true),
+            ],
+          ),
+        );
+
+        final codeCard = Container(
+          padding: EdgeInsets.all(isMobile ? 16 : 20),
+          decoration: BoxDecoration(color: AppTheme.surfaceDark, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppTheme.borderDark)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.code_rounded, size: 18, color: AppTheme.primaryBlue),
+                  SizedBox(width: 8),
+                  Text('Generated Dart Code', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+                ],
               ),
-              const SizedBox(width: 20),
-              // Right: Live Generated Dart Code
-              Expanded(
-                flex: 2,
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(color: AppTheme.surfaceDark, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppTheme.borderDark)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Row(
-                        children: [
-                          Icon(Icons.code_rounded, size: 18, color: AppTheme.primaryBlue),
-                          SizedBox(width: 8),
-                          Text('Generated Dart Code', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        width: double.infinity,
-                        decoration: BoxDecoration(color: AppTheme.cardDark, borderRadius: BorderRadius.circular(6), border: Border.all(color: AppTheme.borderDark)),
-                        child: const Text(
-                          'final config = ImportConfig(\n'
-                          '  chunkSize: 1000,\n'
-                          '  maxErrorTolerance: 50,\n'
-                          '  workerIsolates: 4,\n'
-                          '  strictSchema: true,\n'
-                          '  autoCoerceTypes: true,\n'
-                          '  hardwareAcceleration: true,\n'
-                          '  duplicateStrategy: DuplicateStrategy.skip,\n'
-                          ');\n\n'
-                          'final pipeline = StreamingImporter(\n'
-                          '  config: config,\n'
-                          '  schema: CustomerSchema.v1,\n'
-                          ');\n\n'
-                          'await for (final progress in pipeline.run()) {\n'
-                          '  print("Processed \${progress.percentage}%");\n'
-                          '}',
-                          style: TextStyle(fontFamily: 'Courier', fontSize: 11, color: Color(0xFF58A6FF), height: 1.4),
-                        ),
-                      ),
-                    ],
-                  ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                width: double.infinity,
+                decoration: BoxDecoration(color: AppTheme.cardDark, borderRadius: BorderRadius.circular(6), border: Border.all(color: AppTheme.borderDark)),
+                child: const Text(
+                  'final config = ImportConfig(\n'
+                  '  chunkSize: 1000,\n'
+                  '  maxErrorTolerance: 50,\n'
+                  '  workerIsolates: 4,\n'
+                  '  strictSchema: true,\n'
+                  '  autoCoerceTypes: true,\n'
+                  '  hardwareAcceleration: true,\n'
+                  '  duplicateStrategy: DuplicateStrategy.skip,\n'
+                  ');\n\n'
+                  'final pipeline = StreamingImporter(\n'
+                  '  config: config,\n'
+                  '  schema: CustomerSchema.v1,\n'
+                  ');\n\n'
+                  'await for (final progress in pipeline.run()) {\n'
+                  '  print("Processed \${progress.percentage}%");\n'
+                  '}',
+                  style: TextStyle(fontFamily: 'Courier', fontSize: 11, color: Color(0xFF58A6FF), height: 1.4),
                 ),
               ),
             ],
           ),
-        ],
-      ),
+        );
+
+        return SingleChildScrollView(
+          padding: EdgeInsets.all(isMobile ? 16.0 : 28.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(
+                title: 'Configuration Playground',
+                description: 'Experiment with ingestion chunk sizes, error tolerances, isolate worker concurrency, and live Dart configurations.',
+                icon: Icons.tune_rounded,
+              ),
+              const SizedBox(height: 20),
+              if (isMobile)
+                Column(
+                  children: [
+                    knobsCard,
+                    const SizedBox(height: 16),
+                    codeCard,
+                  ],
+                )
+              else
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(flex: 3, child: knobsCard),
+                    const SizedBox(width: 20),
+                    Expanded(flex: 2, child: codeCard),
+                  ],
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -141,48 +152,72 @@ class DeveloperModeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(28.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(
-            title: 'Developer Mode: Runtime Inspector & Bus State',
-            description: 'Internal package telemetry, execution pipeline state, isolate worker metrics, and diagnostics hooks.',
-            icon: Icons.developer_mode_rounded,
-          ),
-          const SizedBox(height: 20),
-          Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 800;
+
+        return SingleChildScrollView(
+          padding: EdgeInsets.all(isMobile ? 16.0 : 28.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildDevTile('Active Pipeline State', 'IDLE (Ready for Ingestion)', Icons.sync_rounded, AppTheme.successGreen),
-              const SizedBox(width: 14),
-              _buildDevTile('Isolate Workers', '4 Standby / 0 Active', Icons.hub_rounded, AppTheme.primaryBlue),
-              const SizedBox(width: 14),
-              _buildDevTile('GC Heap Memory', '42.8 MB / 68.4 MB Peak', Icons.memory_rounded, const Color(0xFFA371F7)),
-              const SizedBox(width: 14),
-              _buildDevTile('Event Bus Listeners', '12 Active Streams', Icons.cable_rounded, AppTheme.warningAmber),
+              _buildHeader(
+                title: 'Developer Mode: Runtime Inspector & Bus State',
+                description: 'Internal package telemetry, execution pipeline state, isolate worker metrics, and diagnostics hooks.',
+                icon: Icons.developer_mode_rounded,
+              ),
+              const SizedBox(height: 20),
+              if (isMobile) ...[
+                Row(
+                  children: [
+                    _buildDevTile('Pipeline State', 'IDLE', Icons.sync_rounded, AppTheme.successGreen),
+                    const SizedBox(width: 10),
+                    _buildDevTile('Isolates', '4 Standby', Icons.hub_rounded, AppTheme.primaryBlue),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    _buildDevTile('Heap Memory', '42.8 MB', Icons.memory_rounded, const Color(0xFFA371F7)),
+                    const SizedBox(width: 10),
+                    _buildDevTile('Event Streams', '12 Active', Icons.cable_rounded, AppTheme.warningAmber),
+                  ],
+                ),
+              ] else ...[
+                Row(
+                  children: [
+                    _buildDevTile('Active Pipeline State', 'IDLE (Ready for Ingestion)', Icons.sync_rounded, AppTheme.successGreen),
+                    const SizedBox(width: 14),
+                    _buildDevTile('Isolate Workers', '4 Standby / 0 Active', Icons.hub_rounded, AppTheme.primaryBlue),
+                    const SizedBox(width: 14),
+                    _buildDevTile('GC Heap Memory', '42.8 MB / 68.4 MB Peak', Icons.memory_rounded, const Color(0xFFA371F7)),
+                    const SizedBox(width: 14),
+                    _buildDevTile('Event Bus Listeners', '12 Active Streams', Icons.cable_rounded, AppTheme.warningAmber),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 20),
+              // Runtime Flags Card
+              Container(
+                padding: EdgeInsets.all(isMobile ? 16 : 20),
+                decoration: BoxDecoration(color: AppTheme.surfaceDark, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppTheme.borderDark)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Active Developer & Debug Flags', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+                    const SizedBox(height: 14),
+                    _buildFlagRow('kDebugMode', 'TRUE', 'Dart runtime debug assertions enabled'),
+                    _buildFlagRow('kProfileMode', 'FALSE', 'Standard execution profile'),
+                    _buildFlagRow('IsolateWorkerPool.enabled', 'TRUE', 'Multi-threaded background task processing'),
+                    _buildFlagRow('DiagnosticsLogger.verbose', 'TRUE', 'Emitting full chunk telemetry events'),
+                    _buildFlagRow('ValidationEngine.fastFail', 'FALSE', 'Full error inspection (collect all errors)'),
+                  ],
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 20),
-          // Runtime Flags Card
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(color: AppTheme.surfaceDark, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppTheme.borderDark)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Active Developer & Debug Flags', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
-                const SizedBox(height: 14),
-                _buildFlagRow('kDebugMode', 'TRUE', 'Dart runtime debug assertions enabled'),
-                _buildFlagRow('kProfileMode', 'FALSE', 'Standard execution profile'),
-                _buildFlagRow('IsolateWorkerPool.enabled', 'TRUE', 'Multi-threaded background task processing'),
-                _buildFlagRow('DiagnosticsLogger.verbose', 'TRUE', 'Emitting full chunk telemetry events'),
-                _buildFlagRow('ValidationEngine.fastFail', 'FALSE', 'Full error inspection (collect all errors)'),
-              ],
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -279,11 +314,25 @@ class ImportInspectorScreen extends StatelessWidget {
   Widget _buildInfoLine(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          SizedBox(width: 200, child: Text(label, style: const TextStyle(fontSize: 12, color: AppTheme.textMuted))),
-          Expanded(child: Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textPrimary))),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 500) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: const TextStyle(fontSize: 11, color: AppTheme.textMuted)),
+                const SizedBox(height: 2),
+                Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
+              ],
+            );
+          }
+          return Row(
+            children: [
+              SizedBox(width: 180, child: Text(label, style: const TextStyle(fontSize: 12, color: AppTheme.textMuted))),
+              Expanded(child: Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textPrimary))),
+            ],
+          );
+        },
       ),
     );
   }
@@ -432,7 +481,8 @@ class DiagnosticsScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+          Expanded(child: Text(title, style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary))),
+          const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(color: AppTheme.cardDark, borderRadius: BorderRadius.circular(4), border: Border.all(color: AppTheme.borderDark)),
@@ -452,67 +502,99 @@ class LogsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(28.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 800;
+
+        return SingleChildScrollView(
+          padding: EdgeInsets.all(isMobile ? 16.0 : 28.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(
-                title: 'Structured Event Logs',
-                description: 'Real-time telemetry stream from file sniffers, parsers, validators, and database ingestion controllers.',
-                icon: Icons.receipt_long_rounded,
-              ),
-              OutlinedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.file_download_outlined, size: 16),
-                label: const Text('Export Logs (.log)'),
-                style: OutlinedButton.styleFrom(foregroundColor: AppTheme.textSecondary),
+              if (isMobile) ...[
+                _buildHeader(
+                  title: 'Structured Event Logs',
+                  description: 'Real-time telemetry stream from file sniffers and validators.',
+                  icon: Icons.receipt_long_rounded,
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.file_download_outlined, size: 16),
+                  label: const Text('Export Logs (.log)'),
+                  style: OutlinedButton.styleFrom(foregroundColor: AppTheme.textSecondary),
+                ),
+              ] else ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: _buildHeader(
+                        title: 'Structured Event Logs',
+                        description: 'Real-time telemetry stream from file sniffers, parsers, validators, and database ingestion controllers.',
+                        icon: Icons.receipt_long_rounded,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    OutlinedButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(Icons.file_download_outlined, size: 16),
+                      label: const Text('Export Logs (.log)'),
+                      style: OutlinedButton.styleFrom(foregroundColor: AppTheme.textSecondary),
+                    ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 20),
+              Container(
+                decoration: BoxDecoration(color: AppTheme.surfaceDark, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppTheme.borderDark)),
+                child: Column(
+                  children: [
+                    _buildLogItem('15:42:01.102', 'INFO', 'FILE_SNIFFER', 'Detected format XLSX: 3 sheets found in customers.xlsx (492 KB)', AppTheme.primaryBlue),
+                    _buildLogDivider(),
+                    _buildLogItem('15:42:01.115', 'DEBUG', 'SCHEMA_BIND', 'Auto-matched 6/6 columns to CustomerSchema with 96% mean confidence', AppTheme.textMuted),
+                    _buildLogDivider(),
+                    _buildLogItem('15:42:01.120', 'INFO', 'ISOLATE_POOL', 'Spawned 4 background workers for parallel chunk stream processing', AppTheme.primaryBlue),
+                    _buildLogDivider(),
+                    _buildLogItem('15:42:01.350', 'WARN', 'VALIDATOR', 'Row 142: Negative revenue -\$1,200.00 coerced to range minimum', AppTheme.warningAmber),
+                    _buildLogDivider(),
+                    _buildLogItem('15:42:01.520', 'ERROR', 'VALIDATOR', 'Row 47: Invalid email syntax "alex.invalid-email". Missing domain.', AppTheme.errorRed),
+                    _buildLogDivider(),
+                    _buildLogItem('15:42:02.250', 'INFO', 'COMMIT_SVC', 'Committed 9,842 rows into target table in 1.15s (8,540 rows/sec)', AppTheme.successGreen),
+                  ],
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          Container(
-            decoration: BoxDecoration(color: AppTheme.surfaceDark, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppTheme.borderDark)),
-            child: Column(
-              children: [
-                _buildLogItem('15:42:01.102', 'INFO', 'FILE_SNIFFER', 'Detected format XLSX: 3 sheets found in customers.xlsx (492 KB)', AppTheme.primaryBlue),
-                _buildLogDivider(),
-                _buildLogItem('15:42:01.115', 'DEBUG', 'SCHEMA_BIND', 'Auto-matched 6/6 columns to CustomerSchema with 96% mean confidence', AppTheme.textMuted),
-                _buildLogDivider(),
-                _buildLogItem('15:42:01.120', 'INFO', 'ISOLATE_POOL', 'Spawned 4 background workers for parallel chunk stream processing', AppTheme.primaryBlue),
-                _buildLogDivider(),
-                _buildLogItem('15:42:01.350', 'WARN', 'VALIDATOR', 'Row 142: Negative revenue -\$1,200.00 coerced to range minimum', AppTheme.warningAmber),
-                _buildLogDivider(),
-                _buildLogItem('15:42:01.520', 'ERROR', 'VALIDATOR', 'Row 47: Invalid email syntax "alex.invalid-email". Missing domain.', AppTheme.errorRed),
-                _buildLogDivider(),
-                _buildLogItem('15:42:02.250', 'INFO', 'COMMIT_SVC', 'Committed 9,842 rows into target table in 1.15s (8,540 rows/sec)', AppTheme.successGreen),
-              ],
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   Widget _buildLogItem(String time, String level, String tag, String msg, Color color) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(time, style: const TextStyle(fontFamily: 'Courier', fontSize: 11, color: AppTheme.textMuted)),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
             decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(4)),
             child: Text(level, style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
           ),
-          const SizedBox(width: 10),
-          Text('[$tag]', style: const TextStyle(fontFamily: 'Courier', fontSize: 11, color: AppTheme.textSecondary, fontWeight: FontWeight.bold)),
-          const SizedBox(width: 14),
-          Expanded(child: Text(msg, style: const TextStyle(fontSize: 12, color: AppTheme.textPrimary))),
+          const SizedBox(width: 8),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(text: '[$tag] ', style: const TextStyle(fontFamily: 'Courier', fontSize: 11, color: AppTheme.textSecondary, fontWeight: FontWeight.bold)),
+                  TextSpan(text: msg, style: const TextStyle(fontSize: 12, color: AppTheme.textPrimary)),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -529,84 +611,124 @@ class ErrorDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(28.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 800;
+
+        return SingleChildScrollView(
+          padding: EdgeInsets.all(isMobile ? 16.0 : 28.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(
-                title: 'Error Diagnostic: ERR-ROW-47-EMAIL',
-                description: 'Detailed inspection drawer for validation error on line 48 of customers.xlsx.',
-                icon: Icons.bug_report_rounded,
-              ),
-              ElevatedButton.icon(
-                onPressed: () => onNavigate?.call('validation'),
-                icon: const Icon(Icons.arrow_back, size: 16),
-                label: const Text('Back to Validation Report'),
-                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.cardDark, foregroundColor: AppTheme.textPrimary),
+              if (isMobile) ...[
+                _buildHeader(
+                  title: 'Error Diagnostic',
+                  description: 'Inspection drawer for validation error on line 48 of customers.xlsx.',
+                  icon: Icons.bug_report_rounded,
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton.icon(
+                  onPressed: () => onNavigate?.call('validation'),
+                  icon: const Icon(Icons.arrow_back, size: 16),
+                  label: const Text('Back to Validation'),
+                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.cardDark, foregroundColor: AppTheme.textPrimary),
+                ),
+              ] else ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: _buildHeader(
+                        title: 'Error Diagnostic: ERR-ROW-47-EMAIL',
+                        description: 'Detailed inspection drawer for validation error on line 48 of customers.xlsx.',
+                        icon: Icons.bug_report_rounded,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    ElevatedButton.icon(
+                      onPressed: () => onNavigate?.call('validation'),
+                      icon: const Icon(Icons.arrow_back, size: 16),
+                      label: const Text('Back to Validation Report'),
+                      style: ElevatedButton.styleFrom(backgroundColor: AppTheme.cardDark, foregroundColor: AppTheme.textPrimary),
+                    ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 20),
+              Container(
+                padding: EdgeInsets.all(isMobile ? 16 : 24),
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceDark,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppTheme.errorRed.withValues(alpha: 0.4)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(color: AppTheme.errorRed.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(4)),
+                          child: const Text('SEVERITY: BLOCKING ERROR', style: TextStyle(color: AppTheme.errorRed, fontSize: 11, fontWeight: FontWeight.bold)),
+                        ),
+                        const Text('Violated Rule: ValidationRule.email (RFC-5322)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.textPrimary)),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    _buildDetailItem('Offending Field', 'email (Email Address)'),
+                    _buildDetailItem('Raw Ingested Value', '"alex.invalid-email"'),
+                    _buildDetailItem('File Location', 'customers.xlsx ➔ Sheet: "Customers" ➔ Row 47, Column C'),
+                    _buildDetailItem('Root Cause Analysis', 'Input string lacks top-level domain extension (e.g. .com, .org). Regular expression match failed.'),
+                    _buildDetailItem('Suggested Remediation', 'Check customer record for typos. Ensure valid RFC-5322 format: user@domain.com.'),
+                    const SizedBox(height: 18),
+                    const Text('Complete Row JSON Dump', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      width: double.infinity,
+                      decoration: BoxDecoration(color: AppTheme.cardDark, borderRadius: BorderRadius.circular(6), border: Border.all(color: AppTheme.borderDark)),
+                      child: const Text(
+                        '{\n  "row_number": 47,\n  "raw_values": {\n    "id": 1047,\n    "name": "Alex Johnson",\n    "email": "alex.invalid-email",\n    "company": "Demo Corp",\n    "revenue": 125000,\n    "status": "ACTIVE"\n  }\n}',
+                        style: TextStyle(fontFamily: 'Courier', fontSize: 12, color: AppTheme.errorRed, height: 1.4),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: AppTheme.surfaceDark,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppTheme.errorRed.withValues(alpha: 0.4)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(color: AppTheme.errorRed.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(4)),
-                      child: const Text('SEVERITY: BLOCKING ERROR', style: TextStyle(color: AppTheme.errorRed, fontSize: 11, fontWeight: FontWeight.bold)),
-                    ),
-                    const SizedBox(width: 12),
-                    const Text('Violated Rule: ValidationRule.email (RFC-5322)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.textPrimary)),
-                  ],
-                ),
-                const SizedBox(height: 18),
-                _buildDetailItem('Offending Field', 'email (Email Address)'),
-                _buildDetailItem('Raw Ingested Value', '"alex.invalid-email"'),
-                _buildDetailItem('File Location', 'customers.xlsx ➔ Sheet: "Customers" ➔ Row 47, Column C'),
-                _buildDetailItem('Root Cause Analysis', 'Input string lacks top-level domain extension (e.g. .com, .org). Regular expression match failed.'),
-                _buildDetailItem('Suggested Remediation', 'Check customer record for typos. Ensure valid RFC-5322 format: user@domain.com.'),
-                const SizedBox(height: 18),
-                const Text('Complete Row JSON Dump', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  width: double.infinity,
-                  decoration: BoxDecoration(color: AppTheme.cardDark, borderRadius: BorderRadius.circular(6), border: Border.all(color: AppTheme.borderDark)),
-                  child: const Text(
-                    '{\n  "row_number": 47,\n  "raw_values": {\n    "id": 1047,\n    "name": "Alex Johnson",\n    "email": "alex.invalid-email",\n    "company": "Demo Corp",\n    "revenue": 125000,\n    "status": "ACTIVE"\n  }\n}',
-                    style: TextStyle(fontFamily: 'Courier', fontSize: 12, color: AppTheme.errorRed, height: 1.4),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   Widget _buildDetailItem(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(width: 180, child: Text(label, style: const TextStyle(fontSize: 12, color: AppTheme.textMuted))),
-          Expanded(child: Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textPrimary))),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 500) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: const TextStyle(fontSize: 11, color: AppTheme.textMuted)),
+                const SizedBox(height: 2),
+                Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
+              ],
+            );
+          }
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(width: 180, child: Text(label, style: const TextStyle(fontSize: 12, color: AppTheme.textMuted))),
+              Expanded(child: Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textPrimary))),
+            ],
+          );
+        },
       ),
     );
   }
@@ -620,77 +742,104 @@ class PerformanceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(28.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(
-            title: 'Performance Benchmarks & Memory Telemetry',
-            description: 'Execution speed across varying row volumes (10k, 50k, 100k, 500k), parser latency, and memory footprint.',
-            icon: Icons.speed_rounded,
-          ),
-          const SizedBox(height: 20),
-          Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 800;
+
+        return SingleChildScrollView(
+          padding: EdgeInsets.all(isMobile ? 16.0 : 28.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildBenchmarkCard('Peak Throughput', '8,540', 'rows / second', AppTheme.primaryBlue),
-              const SizedBox(width: 14),
-              _buildBenchmarkCard('10,000 Rows Ingestion', '1.15s', 'Total execution duration', AppTheme.successGreen),
-              const SizedBox(width: 14),
-              _buildBenchmarkCard('Validation Latency', '85 ms', 'Across 6 schema fields', const Color(0xFFA371F7)),
-              const SizedBox(width: 14),
-              _buildBenchmarkCard('Max Memory Spike', '42.8 MB', 'Constant streaming profile', AppTheme.warningAmber),
+              _buildHeader(
+                title: 'Performance Benchmarks & Memory Telemetry',
+                description: 'Execution speed across varying row volumes (10k, 50k, 100k, 500k), parser latency, and memory footprint.',
+                icon: Icons.speed_rounded,
+              ),
+              const SizedBox(height: 20),
+              if (isMobile) ...[
+                Row(
+                  children: [
+                    _buildBenchmarkCard('Peak Throughput', '8,540', 'rows / sec', AppTheme.primaryBlue),
+                    const SizedBox(width: 10),
+                    _buildBenchmarkCard('10k Rows Time', '1.15s', 'Total duration', AppTheme.successGreen),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    _buildBenchmarkCard('Validation Latency', '85 ms', '6 schema fields', const Color(0xFFA371F7)),
+                    const SizedBox(width: 10),
+                    _buildBenchmarkCard('Max Heap Spike', '42.8 MB', 'Streaming flat', AppTheme.warningAmber),
+                  ],
+                ),
+              ] else ...[
+                Row(
+                  children: [
+                    _buildBenchmarkCard('Peak Throughput', '8,540', 'rows / second', AppTheme.primaryBlue),
+                    const SizedBox(width: 14),
+                    _buildBenchmarkCard('10,000 Rows Ingestion', '1.15s', 'Total execution duration', AppTheme.successGreen),
+                    const SizedBox(width: 14),
+                    _buildBenchmarkCard('Validation Latency', '85 ms', 'Across 6 schema fields', const Color(0xFFA371F7)),
+                    const SizedBox(width: 14),
+                    _buildBenchmarkCard('Max Memory Spike', '42.8 MB', 'Constant streaming profile', AppTheme.warningAmber),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 20),
+              // Format Performance Comparison Table
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Container(
+                  decoration: BoxDecoration(color: AppTheme.surfaceDark, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppTheme.borderDark)),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: DataTable(
+                      headingRowColor: WidgetStateProperty.all(AppTheme.cardDark),
+                      columnSpacing: isMobile ? 18 : 28,
+                      headingTextStyle: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.textPrimary, fontSize: 13),
+                      columns: const [
+                        DataColumn(label: Text('DATA FORMAT')),
+                        DataColumn(label: Text('10,000 ROWS')),
+                        DataColumn(label: Text('50,000 ROWS')),
+                        DataColumn(label: Text('100,000 ROWS')),
+                        DataColumn(label: Text('THROUGHPUT')),
+                        DataColumn(label: Text('PEAK HEAP')),
+                      ],
+                      rows: const [
+                        DataRow(cells: [
+                          DataCell(Text('CSV (Streaming)', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryBlue))),
+                          DataCell(Text('0.82s')),
+                          DataCell(Text('3.95s')),
+                          DataCell(Text('7.80s')),
+                          DataCell(Text('12,800 rows/s', style: TextStyle(color: AppTheme.successGreen, fontWeight: FontWeight.bold))),
+                          DataCell(Text('38.4 MB')),
+                        ]),
+                        DataRow(cells: [
+                          DataCell(Text('Excel XLSX (OpenXML)', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF107C41)))),
+                          DataCell(Text('1.15s')),
+                          DataCell(Text('5.80s')),
+                          DataCell(Text('11.45s')),
+                          DataCell(Text('8,720 rows/s', style: TextStyle(color: AppTheme.successGreen, fontWeight: FontWeight.bold))),
+                          DataCell(Text('42.8 MB')),
+                        ]),
+                        DataRow(cells: [
+                          DataCell(Text('JSON (Path Traversal)', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFF16529)))),
+                          DataCell(Text('0.98s')),
+                          DataCell(Text('4.85s')),
+                          DataCell(Text('9.60s')),
+                          DataCell(Text('10,400 rows/s', style: TextStyle(color: AppTheme.successGreen, fontWeight: FontWeight.bold))),
+                          DataCell(Text('44.1 MB')),
+                        ]),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 20),
-          // Format Performance Comparison Table
-          Container(
-            decoration: BoxDecoration(color: AppTheme.surfaceDark, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppTheme.borderDark)),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: DataTable(
-                headingRowColor: WidgetStateProperty.all(AppTheme.cardDark),
-                columnSpacing: 28,
-                headingTextStyle: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.textPrimary, fontSize: 13),
-                columns: const [
-                  DataColumn(label: Text('DATA FORMAT')),
-                  DataColumn(label: Text('10,000 ROWS')),
-                  DataColumn(label: Text('50,000 ROWS')),
-                  DataColumn(label: Text('100,000 ROWS')),
-                  DataColumn(label: Text('THROUGHPUT')),
-                  DataColumn(label: Text('PEAK HEAP')),
-                ],
-                rows: const [
-                  DataRow(cells: [
-                    DataCell(Text('CSV (Streaming)', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryBlue))),
-                    DataCell(Text('0.82s')),
-                    DataCell(Text('3.95s')),
-                    DataCell(Text('7.80s')),
-                    DataCell(Text('12,800 rows/s', style: TextStyle(color: AppTheme.successGreen, fontWeight: FontWeight.bold))),
-                    DataCell(Text('38.4 MB')),
-                  ]),
-                  DataRow(cells: [
-                    DataCell(Text('Excel XLSX (OpenXML)', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF107C41)))),
-                    DataCell(Text('1.15s')),
-                    DataCell(Text('5.80s')),
-                    DataCell(Text('11.45s')),
-                    DataCell(Text('8,720 rows/s', style: TextStyle(color: AppTheme.successGreen, fontWeight: FontWeight.bold))),
-                    DataCell(Text('42.8 MB')),
-                  ]),
-                  DataRow(cells: [
-                    DataCell(Text('JSON (Path Traversal)', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFF16529)))),
-                    DataCell(Text('0.98s')),
-                    DataCell(Text('4.85s')),
-                    DataCell(Text('9.60s')),
-                    DataCell(Text('10,400 rows/s', style: TextStyle(color: AppTheme.successGreen, fontWeight: FontWeight.bold))),
-                    DataCell(Text('44.1 MB')),
-                  ]),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 

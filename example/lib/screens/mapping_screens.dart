@@ -9,53 +9,97 @@ class ColumnMappingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(28.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 800;
+
+        return SingleChildScrollView(
+          padding: EdgeInsets.all(isMobile ? 16.0 : 28.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(
-                title: 'Column Mapping: Target Schema Binding',
-                description: 'Map incoming file columns to the Customer Schema. Confidence scores indicate smart auto-match accuracy.',
-                icon: Icons.schema_rounded,
-              ),
-              Row(
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: () => onNavigate?.call('smart_mapping'),
-                    icon: const Icon(Icons.psychology_rounded, size: 16),
-                    label: const Text('Smart Match Engine (96% Confidence)'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.primaryBlue,
-                      side: const BorderSide(color: AppTheme.borderDark),
+              if (isMobile) ...[
+                _buildHeader(
+                  title: 'Column Mapping: Target Schema',
+                  description: 'Map incoming file columns to Customer Schema with auto confidence scores.',
+                  icon: Icons.schema_rounded,
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: () => onNavigate?.call('smart_mapping'),
+                      icon: const Icon(Icons.psychology_rounded, size: 16),
+                      label: const Text('Smart Match (96%)'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.primaryBlue,
+                        side: const BorderSide(color: AppTheme.borderDark),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  ElevatedButton.icon(
-                    onPressed: () => onNavigate?.call('validation'),
-                    icon: const Icon(Icons.arrow_forward_rounded, size: 16),
-                    label: const Text('Validate Mapped Rows'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryAccent,
-                      foregroundColor: Colors.white,
+                    ElevatedButton.icon(
+                      onPressed: () => onNavigate?.call('validation'),
+                      icon: const Icon(Icons.arrow_forward_rounded, size: 16),
+                      label: const Text('Validate Rows'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryAccent,
+                        foregroundColor: Colors.white,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          // Mapping List Table
-          Container(
-            decoration: BoxDecoration(
-              color: AppTheme.surfaceDark,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppTheme.borderDark),
-            ),
-            child: Column(
+                  ],
+                ),
+              ] else ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: _buildHeader(
+                        title: 'Column Mapping: Target Schema Binding',
+                        description: 'Map incoming file columns to the Customer Schema. Confidence scores indicate smart auto-match accuracy.',
+                        icon: Icons.schema_rounded,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Row(
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: () => onNavigate?.call('smart_mapping'),
+                          icon: const Icon(Icons.psychology_rounded, size: 16),
+                          label: const Text('Smart Match Engine (96% Confidence)'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppTheme.primaryBlue,
+                            side: const BorderSide(color: AppTheme.borderDark),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        ElevatedButton.icon(
+                          onPressed: () => onNavigate?.call('validation'),
+                          icon: const Icon(Icons.arrow_forward_rounded, size: 16),
+                          label: const Text('Validate Mapped Rows'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.primaryAccent,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 20),
+              // Mapping List Table
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: isMobile ? 740 : constraints.maxWidth - 56),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppTheme.surfaceDark,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppTheme.borderDark),
+                    ),
+                    child: Column(
               children: [
                 // Header
                 Container(
@@ -135,12 +179,16 @@ class ColumnMappingScreen extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
           const SizedBox(height: 20),
           _buildInfoBanner('All 6 source columns successfully matched to target schema with >88% confidence. No unmapped columns detected.'),
         ],
       ),
     );
-  }
+  },
+);
+}
 
   Widget _buildMappingRow({
     required String sourceCol,
@@ -278,134 +326,163 @@ class SmartMappingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(28.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildHeader(
-                title: 'Smart Matching Engine: Heuristics & Scoring',
-                description: 'Underlying fuzzy matching, Levenshtein distance, token similarity, and dictionary alias resolver.',
-                icon: Icons.psychology_rounded,
-              ),
-              ElevatedButton.icon(
-                onPressed: () => onNavigate?.call('column_mapping'),
-                icon: const Icon(Icons.arrow_back, size: 16),
-                label: const Text('Back to Column Mapping'),
-                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.cardDark, foregroundColor: AppTheme.textPrimary),
-              ),
-            ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 800;
+
+        final scoringCard = Container(
+          padding: EdgeInsets.all(isMobile ? 16 : 20),
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceDark,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: AppTheme.borderDark),
           ),
-          const SizedBox(height: 20),
-          Row(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Left: Scoring Breakdown
-              Expanded(
-                flex: 3,
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surfaceDark,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppTheme.borderDark),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Heuristic Matching Scores', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
-                      const SizedBox(height: 16),
-                      _buildScoreDetail(
-                        inputHeader: 'contact_email',
-                        targetField: 'email',
-                        algorithm: 'Alias Dictionary Lookup',
-                        confidence: 0.98,
-                        notes: 'Matched defined schema alias "contact_email" in CustomerSchema.',
-                        color: AppTheme.successGreen,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildScoreDetail(
-                        inputHeader: 'account_status',
-                        targetField: 'status',
-                        algorithm: 'Suffix / Token Overlap',
-                        confidence: 0.96,
-                        notes: 'Exact token match on "status" + schema alias "account_status".',
-                        color: AppTheme.successGreen,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildScoreDetail(
-                        inputHeader: 'full_name',
-                        targetField: 'name',
-                        algorithm: 'Stemming & Known Synonym',
-                        confidence: 0.94,
-                        notes: 'Matched alias "full_name" mapped to standard name field.',
-                        color: AppTheme.successGreen,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildScoreDetail(
-                        inputHeader: 'organization',
-                        targetField: 'company',
-                        algorithm: 'Thesaurus Synonym Resolver',
-                        confidence: 0.91,
-                        notes: 'Semantic equivalence: organization ↔ company.',
-                        color: AppTheme.primaryBlue,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildScoreDetail(
-                        inputHeader: 'annual_revenue',
-                        targetField: 'revenue',
-                        algorithm: 'Levenshtein Substring Distance',
-                        confidence: 0.88,
-                        notes: 'Target field "revenue" is exact substring with distance = 0.',
-                        color: AppTheme.primaryBlue,
-                      ),
-                    ],
-                  ),
-                ),
+              const Text('Heuristic Matching Scores', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+              const SizedBox(height: 16),
+              _buildScoreDetail(
+                inputHeader: 'contact_email',
+                targetField: 'email',
+                algorithm: 'Alias Dictionary Lookup',
+                confidence: 0.98,
+                notes: 'Matched defined schema alias "contact_email" in CustomerSchema.',
+                color: AppTheme.successGreen,
               ),
-              const SizedBox(width: 20),
-              // Right: Active Dictionary & Settings
-              Expanded(
-                flex: 2,
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surfaceDark,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppTheme.borderDark),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Matching Parameters', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
-                      const SizedBox(height: 14),
-                      _buildParamRow('Minimum Confidence Threshold', '50% (0.50)'),
-                      _buildParamRow('Case Insensitive Normalization', 'Enabled'),
-                      _buildParamRow('Punctuation Stripping', 'Enabled (_ - space)'),
-                      _buildParamRow('Stemming & Lemmatization', 'Active (Porter Stemmer)'),
-                      const SizedBox(height: 16),
-                      const Divider(color: AppTheme.borderDark),
-                      const SizedBox(height: 14),
-                      const Text('Pre-Configured Aliases', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
-                      const SizedBox(height: 8),
-                      _buildAliasChip('name', ['full_name', 'client_name', 'contact_name']),
-                      const SizedBox(height: 6),
-                      _buildAliasChip('email', ['e_mail', 'contact_email', 'email_address']),
-                      const SizedBox(height: 6),
-                      _buildAliasChip('company', ['org', 'organization', 'company_name']),
-                      const SizedBox(height: 6),
-                      _buildAliasChip('revenue', ['annual_revenue', 'rev', 'sales', 'arr']),
-                    ],
-                  ),
-                ),
+              const SizedBox(height: 12),
+              _buildScoreDetail(
+                inputHeader: 'account_status',
+                targetField: 'status',
+                algorithm: 'Suffix / Token Overlap',
+                confidence: 0.96,
+                notes: 'Exact token match on "status" + schema alias "account_status".',
+                color: AppTheme.successGreen,
+              ),
+              const SizedBox(height: 12),
+              _buildScoreDetail(
+                inputHeader: 'full_name',
+                targetField: 'name',
+                algorithm: 'Stemming & Known Synonym',
+                confidence: 0.94,
+                notes: 'Matched alias "full_name" mapped to standard name field.',
+                color: AppTheme.successGreen,
+              ),
+              const SizedBox(height: 12),
+              _buildScoreDetail(
+                inputHeader: 'organization',
+                targetField: 'company',
+                algorithm: 'Thesaurus Synonym Resolver',
+                confidence: 0.91,
+                notes: 'Semantic equivalence: organization ↔ company.',
+                color: AppTheme.primaryBlue,
+              ),
+              const SizedBox(height: 12),
+              _buildScoreDetail(
+                inputHeader: 'annual_revenue',
+                targetField: 'revenue',
+                algorithm: 'Levenshtein Substring Distance',
+                confidence: 0.88,
+                notes: 'Target field "revenue" is exact substring with distance = 0.',
+                color: AppTheme.primaryBlue,
               ),
             ],
           ),
-        ],
-      ),
+        );
+
+        final parametersCard = Container(
+          padding: EdgeInsets.all(isMobile ? 16 : 20),
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceDark,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: AppTheme.borderDark),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Matching Parameters', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+              const SizedBox(height: 14),
+              _buildParamRow('Minimum Confidence Threshold', '50% (0.50)'),
+              _buildParamRow('Case Insensitive Normalization', 'Enabled'),
+              _buildParamRow('Punctuation Stripping', 'Enabled (_ - space)'),
+              _buildParamRow('Stemming & Lemmatization', 'Active (Porter Stemmer)'),
+              const SizedBox(height: 16),
+              const Divider(color: AppTheme.borderDark),
+              const SizedBox(height: 14),
+              const Text('Pre-Configured Aliases', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+              const SizedBox(height: 8),
+              _buildAliasChip('name', ['full_name', 'client_name', 'contact_name']),
+              const SizedBox(height: 6),
+              _buildAliasChip('email', ['e_mail', 'contact_email', 'email_address']),
+              const SizedBox(height: 6),
+              _buildAliasChip('company', ['org', 'organization', 'company_name']),
+              const SizedBox(height: 6),
+              _buildAliasChip('revenue', ['annual_revenue', 'rev', 'sales', 'arr']),
+            ],
+          ),
+        );
+
+        return SingleChildScrollView(
+          padding: EdgeInsets.all(isMobile ? 16.0 : 28.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (isMobile) ...[
+                _buildHeader(
+                  title: 'Smart Matching Engine',
+                  description: 'Fuzzy matching, Levenshtein distance, and dictionary alias resolver.',
+                  icon: Icons.psychology_rounded,
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton.icon(
+                  onPressed: () => onNavigate?.call('column_mapping'),
+                  icon: const Icon(Icons.arrow_back, size: 16),
+                  label: const Text('Back to Mapping'),
+                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.cardDark, foregroundColor: AppTheme.textPrimary),
+                ),
+              ] else ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: _buildHeader(
+                        title: 'Smart Matching Engine: Heuristics & Scoring',
+                        description: 'Underlying fuzzy matching, Levenshtein distance, token similarity, and dictionary alias resolver.',
+                        icon: Icons.psychology_rounded,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    ElevatedButton.icon(
+                      onPressed: () => onNavigate?.call('column_mapping'),
+                      icon: const Icon(Icons.arrow_back, size: 16),
+                      label: const Text('Back to Column Mapping'),
+                      style: ElevatedButton.styleFrom(backgroundColor: AppTheme.cardDark, foregroundColor: AppTheme.textPrimary),
+                    ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 20),
+              if (isMobile)
+                Column(
+                  children: [
+                    scoringCard,
+                    const SizedBox(height: 16),
+                    parametersCard,
+                  ],
+                )
+              else
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(flex: 3, child: scoringCard),
+                    const SizedBox(width: 20),
+                    Expanded(flex: 2, child: parametersCard),
+                  ],
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -499,81 +576,105 @@ class TransformationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(28.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 800;
+
+        return SingleChildScrollView(
+          padding: EdgeInsets.all(isMobile ? 16.0 : 28.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(
-                title: 'Data Transformation Pipeline',
-                description: 'Pre-process and clean field values before database persistence. Chained operations execute in sequence.',
-                icon: Icons.transform_rounded,
-              ),
-              ElevatedButton.icon(
-                onPressed: () => onNavigate?.call('validation'),
-                icon: const Icon(Icons.arrow_forward, size: 16),
-                label: const Text('Apply & Re-Validate'),
-                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryAccent, foregroundColor: Colors.white),
+              if (isMobile) ...[
+                _buildHeader(
+                  title: 'Transformation Pipeline',
+                  description: 'Pre-process and clean field values before persistence.',
+                  icon: Icons.transform_rounded,
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton.icon(
+                  onPressed: () => onNavigate?.call('validation'),
+                  icon: const Icon(Icons.arrow_forward, size: 16),
+                  label: const Text('Apply & Re-Validate'),
+                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryAccent, foregroundColor: Colors.white),
+                ),
+              ] else ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: _buildHeader(
+                        title: 'Data Transformation Pipeline',
+                        description: 'Pre-process and clean field values before database persistence. Chained operations execute in sequence.',
+                        icon: Icons.transform_rounded,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    ElevatedButton.icon(
+                      onPressed: () => onNavigate?.call('validation'),
+                      icon: const Icon(Icons.arrow_forward, size: 16),
+                      label: const Text('Apply & Re-Validate'),
+                      style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryAccent, foregroundColor: Colors.white),
+                    ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 20),
+              // Active Transformation Rules
+              Container(
+                padding: EdgeInsets.all(isMobile ? 16 : 20),
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceDark,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppTheme.borderDark),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Configured Field Transformations', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+                    const SizedBox(height: 16),
+                    _buildTransformRule(
+                      targetField: 'Customer Name (name)',
+                      opName: 'Title Case Formatter',
+                      opDescription: 'Capitalizes the first character of each word ("alex johnson" ➔ "Alex Johnson").',
+                      sampleBefore: 'alex johnson',
+                      sampleAfter: 'Alex Johnson',
+                      color: AppTheme.primaryBlue,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildTransformRule(
+                      targetField: 'Email Address (email)',
+                      opName: 'Trim Whitespace + Lowercase',
+                      opDescription: 'Strips accidental spaces and normalizes RFC-5322 characters (" Alex@Example.COM " ➔ "alex@example.com").',
+                      sampleBefore: ' Alex@Example.COM ',
+                      sampleAfter: 'alex@example.com',
+                      color: AppTheme.successGreen,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildTransformRule(
+                      targetField: 'Company (company)',
+                      opName: 'Sanitize Characters + Default Fallback',
+                      opDescription: 'Removes unprintable ASCII control characters. If empty, defaults to "Independent".',
+                      sampleBefore: '[NULL]',
+                      sampleAfter: 'Independent',
+                      color: const Color(0xFFA371F7),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildTransformRule(
+                      targetField: 'Annual Revenue (revenue)',
+                      opName: 'Currency Number Normalization',
+                      opDescription: 'Strips currency symbols like "\$" or "USD" and parses to high-precision double.',
+                      sampleBefore: '\$125,000.00',
+                      sampleAfter: '125000.0',
+                      color: AppTheme.warningAmber,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          // Active Transformation Rules
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppTheme.surfaceDark,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppTheme.borderDark),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Configured Field Transformations', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
-                const SizedBox(height: 16),
-                _buildTransformRule(
-                  targetField: 'Customer Name (name)',
-                  opName: 'Title Case Formatter',
-                  opDescription: 'Capitalizes the first character of each word ("alex johnson" ➔ "Alex Johnson").',
-                  sampleBefore: 'alex johnson',
-                  sampleAfter: 'Alex Johnson',
-                  color: AppTheme.primaryBlue,
-                ),
-                const SizedBox(height: 12),
-                _buildTransformRule(
-                  targetField: 'Email Address (email)',
-                  opName: 'Trim Whitespace + Lowercase',
-                  opDescription: 'Strips accidental spaces and normalizes RFC-5322 characters (" Alex@Example.COM " ➔ "alex@example.com").',
-                  sampleBefore: ' Alex@Example.COM ',
-                  sampleAfter: 'alex@example.com',
-                  color: AppTheme.successGreen,
-                ),
-                const SizedBox(height: 12),
-                _buildTransformRule(
-                  targetField: 'Company (company)',
-                  opName: 'Sanitize Characters + Default Fallback',
-                  opDescription: 'Removes unprintable ASCII control characters. If empty, defaults to "Independent".',
-                  sampleBefore: '[NULL]',
-                  sampleAfter: 'Independent',
-                  color: const Color(0xFFA371F7),
-                ),
-                const SizedBox(height: 12),
-                _buildTransformRule(
-                  targetField: 'Annual Revenue (revenue)',
-                  opName: 'Currency Number Normalization',
-                  opDescription: 'Strips currency symbols like "\$" or "USD" and parses to high-precision double.',
-                  sampleBefore: '\$125,000.00',
-                  sampleAfter: '125000.0',
-                  color: AppTheme.warningAmber,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -605,8 +706,11 @@ class TransformationScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(targetField, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
                     Container(
