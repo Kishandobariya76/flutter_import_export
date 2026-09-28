@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Building Production-Grade Data Ingestion in Flutter: CSV, Excel, and JSON</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      line-height: 1.75;
+      color: #242424;
+      background: #ffffff;
+      max-width: 740px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    h1 {
+      font-size: 40px;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+      color: #1a1a1a;
+    }
+    .subtitle {
+      font-size: 22px;
+      color: #6b6b6b;
+      margin-bottom: 28px;
+      line-height: 1.4;
+    }
+    .author-byline {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 36px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .byline-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid #eaeaea;
+    }
+    .byline-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .byline-name {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #242424;
+    }
+    .byline-name a {
+      color: #242424;
+      text-decoration: none;
+    }
+    .byline-name a:hover {
+      text-decoration: underline;
+    }
+    .follow-btn {
+      font-size: 13px;
+      font-weight: 500;
+      color: #1a8917 !important;
+      border: 1px solid #1a8917;
+      border-radius: 9999px;
+      padding: 2px 10px;
+      text-decoration: none !important;
+    }
+    .follow-btn:hover {
+      background: #1a8917;
+      color: #ffffff !important;
+    }
+    .byline-sub {
+      font-size: 14px;
+      color: #757575;
+    }
+
+    .developer-profile-card {
+      background: #fafafa;
+      border: 1px solid #eaeaea;
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      margin-top: 20px;
+      margin-bottom: 40px;
+    }
+    .dev-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      flex-shrink: 0;
+    }
+    .dev-details h3 {
+      margin-top: 0;
+      margin-bottom: 4px;
+      font-size: 20px;
+    }
+    .dev-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a8917;
+      margin-bottom: 8px;
+    }
+    .dev-bio {
+      font-size: 15px;
+      color: #555555;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .dev-social-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .dev-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #333333;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .dev-link:hover {
+      border-color: #1a8917;
+      color: #1a8917;
+      background: #f0fdf4;
+    }
+    h2 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-top: 48px;
+      margin-bottom: 16px;
+      letter-spacing: -0.01em;
+      color: #191919;
+    }
+    h3 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-top: 32px;
+      margin-bottom: 12px;
+      color: #292929;
+    }
+    p {
+      font-size: 18px;
+      margin-bottom: 24px;
+      color: #292929;
+    }
+    ul, ol {
+      font-size: 18px;
+      margin-bottom: 24px;
+      padding-left: 28px;
+    }
+    li {
+      margin-bottom: 10px;
+    }
+    blockquote {
+      border-left: 3px solid #242424;
+      padding-left: 20px;
+      margin-left: 0;
+      margin-bottom: 24px;
+      font-style: italic;
+      color: #4a4a4a;
+    }
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 18px 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: "JetBrains Mono", Consolas, Monaco, "Courier New", monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    code {
+      font-family: "JetBrains Mono", Consolas, Monaco, monospace;
+      background: #f2f2f2;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+      color: #d63384;
+    }
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+    }
+    figure {
+      margin: 36px 0;
+    }
+    figure img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border: 1px solid #eaeaea;
+    }
+    figcaption {
+      font-size: 14px;
+      color: #757575;
+      text-align: center;
+      margin-top: 8px;
+    }
+    a {
+      color: #1a8917;
+      text-decoration: underline;
+    }
+    .badge-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Building Production-Grade Data Ingestion in Flutter: CSV, Excel, and JSON</h1>
+  <div class="subtitle">How to handle 50,000+ rows, fuzzy header mapping, and data validation without freezing the UI thread or crashing your app.</div>
+
+  <div class="author-byline">
+    <img class="byline-avatar" src="https://avatars.githubusercontent.com/u/123400595?v=4" alt="Kishan Dobariya">
+    <div class="byline-info">
+      <div class="byline-name">
+        <a href="https://github.com/Kishandobariya76" target="_blank">Kishan Dobariya</a>
+        <a href="https://github.com/Kishandobariya76" target="_blank" class="follow-btn">Follow</a>
+      </div>
+      <div class="byline-sub">
+        <span>Flutter Engineer &amp; Open Source Creator</span> • <span>8 min read</span> • <span>Sep 28, 2026</span>
+      </div>
+    </div>
+  </div>
+
+  <figure>
+    <img src="https://raw.githubusercontent.com/Kishandobariya76/flutter_import_export/main/doc/screenshots/dashboard.png" alt="Flutter Import Export Dashboard">
+    <figcaption>The flutter_import_export mission control dashboard in Flutter</figcaption>
+  </figure>
+
+  <p>If you build enterprise software, internal tools, or SaaS products in Flutter, you’ve almost certainly had to build file import and export features. At first glance, it feels like a simple task: pick a file with <code>file_picker</code>, parse the string or bytes, and loop through the rows to save them into your database.</p>
+
+  <p>Then your users get their hands on it, and everything falls apart.</p>
+
+  <p>A customer uploads a 25,000-row Excel spreadsheet. The screen freezes for four seconds. The operating system prompts: <em>"App is not responding"</em>. Or worse, the file has a column named <code>"Email Address"</code> instead of <code>"email"</code>, resulting in silent drops, null-pointer exceptions, or hundreds of corrupted records in your production backend.</p>
+
+  <p>After wrestling with these exact headaches across client projects, I created and open-sourced <a href="https://pub.dev/packages/flutter_import_export" target="_blank"><strong>flutter_import_export</strong></a>. In this story, we’ll look at the architectural pitfalls of client-side data ingestion and how to solve each one cleanly.</p>
+
+  <hr style="border:0; border-top:1px solid #eee; margin: 40px 0;">
+
+  <h2>The 4 Hidden Killers of Data Ingestion</h2>
+
+  <h3>1. UI Thread Freezes (The OOM Trap)</h3>
+  <p>Dart runs on a single event loop. When you decode a 30MB CSV or multi-tab XLSX file synchronously on the main thread, Dart allocates hundreds of thousands of heap objects all at once. The garbage collector stalls, frame rates drop to zero, and low-memory mobile devices simply kill the process.</p>
+  <p><strong>The Solution:</strong> Heavy decoding, row transformation, and constraint checking must run inside <strong>dedicated Dart Isolates</strong> using chunked streaming (e.g., 250–1,000 rows per batch) with live throughput metrics and cancellation tokens.</p>
+
+  <h3>2. Inconsistent Headers and Typos</h3>
+  <p>Never assume human users will follow your exact CSV template. One user uploads <code>"contact_email"</code>, another exports <code>"E-Mail"</code> from Salesforce, and another names it <code>"Email Address"</code>.</p>
+  <p><strong>The Solution:</strong> A 4-tier schema matcher that runs <em>before</em> any row hits your isolate pipeline, utilizing exact keys, synonym alias dictionaries, and normalized Levenshtein distance scores.</p>
+
+  <figure>
+    <img src="https://raw.githubusercontent.com/Kishandobariya76/flutter_import_export/main/doc/screenshots/column_mapping.png" alt="Smart Column Mapping">
+    <figcaption>Automatic header matching with similarity confidence scores and alias resolvers</figcaption>
+  </figure>
+
+  <h3>3. Dirty Data Polluting Databases</h3>
+  <p>A single invalid row with a malformed date or missing foreign key can cause an atomic database transaction to rollback, failing an entire 10,000-record batch.</p>
+  <p><strong>The Solution:</strong> A pre-persistence validation engine that generates visual audit reports. It quarantines blocking errors (e.g., malformed emails) while allowing valid records to proceed smoothly.</p>
+
+  <figure>
+    <img src="https://raw.githubusercontent.com/Kishandobariya76/flutter_import_export/main/doc/screenshots/validation.png" alt="Pre-Persistence Validation Report">
+    <figcaption>Pre-import validation flagging blocking syntax errors before persistence</figcaption>
+  </figure>
+
+  <h3>4. Dependency Breaking Changes</h3>
+  <p>Relying on volatile third-party packages for CSV parsing often leads to version solving conflicts between major releases (like when <code>csv</code> 8.0 introduced breaking changes and required unreleased Dart SDKs). A production tool must be self-reliant, zero-dependency, and strictly adhere to RFC-4180 standards.</p>
+
+  <hr style="border:0; border-top:1px solid #eee; margin: 40px 0;">
+
+  <h2>Step-by-Step: Implementing flutter_import_export</h2>
+
+  <h3>Step 1: Install the Package</h3>
+  <p>Add <code>flutter_import_export</code> to your <code>pubspec.yaml</code>:</p>
+  <pre><code>dependencies:
+  flutter_import_export: ^1.0.2</code></pre>
+
+  <h3>Step 2: Define Your Target Schema</h3>
+  <p>Schemas define what fields your application expects, whether they are required, their data types, and any known aliases:</p>
+  <pre><code>import 'package:flutter_import_export/flutter_import_export.dart';
+
+final customerSchema = DataSchema(
+  id: 'customer_schema',
+  name: 'Customer Ingestion Schema',
+  fields: [
+    SchemaField(
+      key: 'full_name',
+      label: 'Full Name',
+      type: FieldType.string,
+      isRequired: true,
+      aliases: ['name', 'customer_name', 'client'],
+    ),
+    SchemaField(
+      key: 'email',
+      label: 'Email Address',
+      type: FieldType.email,
+      isRequired: true,
+      aliases: ['contact_email', 'e-mail', 'mail'],
+    ),
+    SchemaField(
+      key: 'company',
+      label: 'Company',
+      type: FieldType.string,
+      isRequired: false,
+      aliases: ['organization', 'org', 'business'],
+    ),
+    SchemaField(
+      key: 'revenue',
+      label: 'Annual Revenue',
+      type: FieldType.number,
+      isRequired: false,
+      aliases: ['sales', 'annual_revenue'],
+    ),
+  ],
+);</code></pre>
+
+  <h3>Step 3: Preview and Auto-Bind File Columns</h3>
+  <p>When the user uploads a file, inspect the first few lines and let the <code>SmartMatcher</code> automatically resolve the columns:</p>
+  <pre><code>// 1. Sniff delimiter and parse sample rows
+final rawContent = await file.readAsString();
+final delimiter = CsvProcessor.detectDelimiter(rawContent);
+final rows = CsvProcessor.parseCsv(rawContent, delimiter: delimiter);
+
+final sourceHeaders = rows.first.map((e) => e.toString()).toList();
+
+// 2. Auto-match against schema
+final mappings = SmartMatcher.matchColumns(
+  sourceColumns: sourceHeaders,
+  schema: customerSchema,
+  threshold: 0.5, // 50% minimum fuzzy confidence
+);
+
+// 3. Fail fast if required fields cannot be found
+final unmappedRequired = customerSchema.fields.where(
+  (f) => f.isRequired && !mappings.any((m) => m.targetFieldKey == f.key),
+);
+
+if (unmappedRequired.isNotEmpty) {
+  print('Missing required columns: $unmappedRequired');
+  // Prompt user to select manually via UI
+}</code></pre>
+
+  <figure>
+    <img src="https://raw.githubusercontent.com/Kishandobariya76/flutter_import_export/main/doc/screenshots/file_preview.png" alt="Data Preview Table">
+    <figcaption>High-density tabular preview inspecting the first 100 rows with type density chips</figcaption>
+  </figure>
+
+  <h3>Step 4: Stream Ingestion Without UI Lag</h3>
+  <p>Feed the raw records into the <code>StreamingImporter</code>. It processes rows in chunks, applies transformations, validates constraints, and yields real-time progress:</p>
+  <pre><code>final cancellationToken = CancellationToken();
+
+final progressStream = StreamingImporter.runImport(
+  rawRows: mappedRecords,
+  schema: customerSchema,
+  transformations: [
+    TransformationRule.trim(fieldKey: 'email'),
+    TransformationRule.lowercase(fieldKey: 'email'),
+  ],
+  duplicateStrategy: DuplicateStrategy.skip,
+  chunkSize: 500, // 500 rows per isolate chunk
+  cancellationToken: cancellationToken,
+);
+
+await for (final progress in progressStream) {
+  print('Progress: ${(progress.percentage * 100).toInt()}% '
+        '(${progress.processedRows}/${progress.totalRows} rows) - '
+        'Throughput: ${progress.throughputRowsPerSecond} rows/sec');
+}</code></pre>
+
+  <figure>
+    <img src="https://raw.githubusercontent.com/Kishandobariya76/flutter_import_export/main/doc/screenshots/import_result.png" alt="Import Results">
+    <figcaption>Execution summary detailing clean commits, warnings, quarantined errors, and throughput</figcaption>
+  </figure>
+
+  <h3>Step 5: Exporting Clean Data Back Out</h3>
+  <p>Need to let users export their filtered data or reports? You can serialize structured rows into CSV, Excel (.xlsx), or JSON with a single call:</p>
+  <pre><code>// Exporting to RFC-4180 CSV
+final csvString = CsvProcessor.exportCsv(
+  headers: ['Full Name', 'Email', 'Company', 'Revenue'],
+  rows: [
+    ['Jane Doe', 'jane@acme.com', 'Acme Corp', 150000],
+    ['John Smith', 'john@apple.com', 'Tech Inc', 220000],
+  ],
+  quoteAllFields: false,
+);
+
+// Exporting to JSON or JSONL
+final jsonString = JsonProcessor.exportJson(
+  records: dataset,
+  prettyPrint: true,
+);</code></pre>
+
+  <figure>
+    <img src="https://raw.githubusercontent.com/Kishandobariya76/flutter_import_export/main/doc/screenshots/export_csv.png" alt="CSV Export Engine">
+    <figcaption>Fine-grained serialization options for CSV, Excel (XLSX), and JSON</figcaption>
+  </figure>
+
+  <h3>Step 6: Displaying with ImportExportDataTable</h3>
+  <p>The package also ships with a responsive, dual-axis scrolling data table that comes with 5 pre-built design themes (Dark, Light, Ocean Navy, Emerald, and Minimal Bordered):</p>
+  <pre><code>ImportExportDataTable(
+  columns: [
+    DataTableColumn(key: 'name', title: 'Name', sortable: true),
+    DataTableColumn(key: 'email', title: 'Email', sortable: true),
+    DataTableColumn(key: 'company', title: 'Company'),
+  ],
+  rows: loadedRecords,
+  config: TableDesignConfig.oceanNavy(),
+  pageSize: 15,
+  showPagination: true,
+)</code></pre>
+
+  <hr style="border:0; border-top:1px solid #eee; margin: 40px 0;">
+
+  <h2>Key Takeaways</h2>
+  <ul>
+    <li><strong>Keep parsing off the UI thread:</strong> Always use chunked isolate streaming for large datasets to keep animations at 60/120 FPS.</li>
+    <li><strong>Validate headers upfront:</strong> Run fuzzy matching and alias resolution during the preview step so users can fix issues before streaming begins.</li>
+    <li><strong>Provide audit logs:</strong> Distinguish between non-fatal warnings (e.g. whitespace trimmed) and fatal blocking errors (e.g. invalid email syntax).</li>
+    <li><strong>Zero dependency risk:</strong> Built-in native RFC-4180 support prevents unexpected dependency breakage across Flutter/Dart updates.</li>
+  </ul>
+
+  <h2>Get Started &amp; Resources</h2>
+  <div class="badge-card">
+    <div>
+      <p style="margin: 0; font-size: 16px;">
+        📦 <strong>pub.dev:</strong> <a href="https://pub.dev/packages/flutter_import_export" target="_blank">pub.dev/packages/flutter_import_export</a><br>
+        💻 <strong>GitHub:</strong> <a href="https://github.com/Kishandobariya76/flutter_import_export" target="_blank">github.com/Kishandobariya76/flutter_import_export</a><br>
+        💎 <strong>Flutter Gems:</strong> Indexed under CSV, Excel, ODS &amp; Sheets
+      </p>
+    </div>
+  </div>
+
+  <p>If you have questions, feedback, or need support for additional file formats (such as parquet or SQLite), check out the GitHub repository, star the project, or open an issue!</p>
+
+  <hr style="border:0; border-top:1px solid #eee; margin: 40px 0;">
+
+  <h2>About the Developer</h2>
+  <div class="developer-profile-card">
+    <img class="dev-avatar" src="https://avatars.githubusercontent.com/u/123400595?v=4" alt="Kishan Dobariya">
+    <div class="dev-details">
+      <h3>Kishan Dobariya</h3>
+      <div class="dev-title">Mobile Software Engineer &amp; Flutter Specialist</div>
+      <p class="dev-bio">
+        Passionate about crafting high-performance, production-grade Flutter architectures, developer tooling, and cross-platform ecosystems. Creator of <strong>flutter_import_export</strong> and <strong>flutter_guard_sdk</strong>.
+      </p>
+      <div class="dev-social-links">
+        <a href="https://github.com/Kishandobariya76" target="_blank" class="dev-link">
+          <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub: @Kishandobariya76
+        </a>
+        <a href="https://pub.dev/packages/flutter_import_export" target="_blank" class="dev-link">
+          <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          pub.dev: flutter_import_export
+        </a>
+        <a href="https://fluttergems.dev/ods-xlsx-sheets/" target="_blank" class="dev-link">
+          💎 Flutter Gems
+        </a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
