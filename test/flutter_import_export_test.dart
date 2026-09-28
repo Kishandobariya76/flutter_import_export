@@ -51,6 +51,25 @@ void main() {
       final rows = CsvProcessor.parseCsv(csvData);
       expect(rows.length, equals(2));
       expect(rows[1][0], equals('Alex Johnson'));
+
+      // Test RFC-4180 quotes, escaped quotes, newlines and numbers
+      const complexData = '"Acme, Inc.",100,"Line 1\nLine 2","She said ""Hi"""\n';
+      final complexRows = CsvProcessor.parseCsv(complexData);
+      expect(complexRows.length, equals(1));
+      expect(complexRows[0][0], equals('Acme, Inc.'));
+      expect(complexRows[0][1], equals(100));
+      expect(complexRows[0][2], equals('Line 1\nLine 2'));
+      expect(complexRows[0][3], equals('She said "Hi"'));
+
+      // Test export
+      final exported = CsvProcessor.exportCsv(
+        headers: ['Name', 'Role'],
+        rows: [['Jane, Doe', 'Admin "Lead"']],
+      );
+      final roundtrip = CsvProcessor.parseCsv(exported);
+      expect(roundtrip.length, equals(2));
+      expect(roundtrip[1][0], equals('Jane, Doe'));
+      expect(roundtrip[1][1], equals('Admin "Lead"'));
     });
 
     test('ValidationEngine flags invalid emails and missing required fields', () {

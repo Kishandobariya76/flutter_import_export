@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.2
+
+* **Fix:** Replaced third-party `csv` library dependency with a built-in, zero-dependency RFC-4180 compliant CSV parser and serializer.
+* **Fix:** Resolves static analysis errors on pub.dev caused by API deletions in external `csv` 8.0.0.
+* **Fix:** Restores 100% full platform compatibility (iOS, Android, Web, macOS, Windows, Linux) with 0 external dependency conflicts.
+
 ## 1.0.1
 
 * **Fix:** Relaxed Dart SDK environment constraint to `sdk: ">=3.0.0 <4.0.0"` and `flutter: ">=3.0.0"` for stable Flutter 3.x and Dart 3.0+ compatibility.
