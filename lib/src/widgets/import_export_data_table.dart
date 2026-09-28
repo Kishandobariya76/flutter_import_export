@@ -251,7 +251,7 @@ class _ImportExportDataTableState extends State<ImportExportDataTable> {
       final isSorted = _sortColumnKey == col.key;
       cols.add(
         DataColumn(
-          onSort: col.sortable ? (_, _) => _onSort(col.key) : null,
+          onSort: col.sortable ? (_, __) => _onSort(col.key) : null,
           label: widget.headerBuilder != null
               ? widget.headerBuilder!(context, col)
               : Row(

@@ -34,12 +34,12 @@ class CsvProcessor {
   /// Parse CSV string into list of rows.
   static List<List<dynamic>> parseCsv(String content, {String? delimiter}) {
     final delim = delimiter ?? detectDelimiter(content);
-    final parser = Csv(
+    final normalized = content.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
+    return CsvToListConverter(
       fieldDelimiter: delim,
-      autoDetect: delimiter == null,
-      skipEmptyLines: true,
-    );
-    return parser.decode(content);
+      eol: '\n',
+      shouldParseNumbers: true,
+    ).convert(normalized);
   }
 
   /// Convert structured data to CSV string.
@@ -49,10 +49,9 @@ class CsvProcessor {
     String delimiter = ',',
     bool quoteAllFields = false,
   }) {
-    final encoder = Csv(
+    return ListToCsvConverter(
       fieldDelimiter: delimiter,
-      quoteMode: quoteAllFields ? QuoteMode.always : QuoteMode.necessary,
-    );
-    return encoder.encode([headers, ...rows]);
+      delimitAllFields: quoteAllFields,
+    ).convert([headers, ...rows]);
   }
 }

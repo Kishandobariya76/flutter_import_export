@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.1
+
+* **Fix:** Relaxed Dart SDK environment constraint to `sdk: ">=3.0.0 <4.0.0"` and `flutter: ">=3.0.0"` for stable Flutter 3.x and Dart 3.0+ compatibility.
+* **Fix:** Broadened `csv` dependency constraint to `csv: ">=6.0.0 <9.0.0"`.
+* **Fix:** Replaced version-specific parser with universal `CsvToListConverter` and `ListToCsvConverter` supporting multi-platform line endings (`\r\n`, `\n`).
+* **Fix:** Resolved duplicate closure argument warning in `ImportExportDataTable`.
+
 ## 1.0.0
 
 * **Initial Production Release of `flutter_import_export`**
